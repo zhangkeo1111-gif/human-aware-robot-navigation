@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "technical_pass": true,
+  "visual_review": "Reviewed 4-frame start/middle/end contact sheets for all six videos, plus Circular robot-camera interaction at 6 s. Continuous scene, visible motion and estimated overlays; no GT overlay. Border truncation and occasional duplicate detections remain. All frames decoded; this is sampled visual inspection, not a claim of perfect detections.",
+  "videos": [
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\benchmark\\frontal\\baseline\\seed_17\\run_01\\NAVWARESET_FRONTAL.mp4",
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "313",
+      "duration_s": 31.3,
+      "decoded": true,
+      "valid": true,
+      "review_image": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\REVIEW_frontal_baseline_third.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\benchmark\\frontal\\social_nav\\seed_17\\run_01\\NAVWARESET_FRONTAL.mp4",
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "377",
+      "duration_s": 37.7,
+      "decoded": true,
+      "valid": true,
+      "review_image": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\REVIEW_frontal_social_nav_third.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\benchmark\\perpendicular\\baseline\\seed_17\\run_01\\NAVWARESET_PERPENDICULAR.mp4",
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "361",
+      "duration_s": 36.1,
+      "decoded": true,
+      "valid": true,
+      "review_image": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\REVIEW_perpendicular_baseline_third.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\benchmark\\perpendicular\\social_nav\\seed_17\\run_01\\NAVWARESET_PERPENDICULAR.mp4",
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "348",
+      "duration_s": 34.8,
+      "decoded": true,
+      "valid": true,
+      "review_image": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\REVIEW_perpendicular_social_nav_third.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\benchmark\\circular\\social_nav\\seed_17\\run_01\\NAVWARESET_CIRCULAR.mp4",
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "403",
+      "duration_s": 40.3,
+      "decoded": true,
+      "valid": true,
+      "review_image": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\REVIEW_circular_social_nav_third.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\benchmark\\circular\\social_nav\\seed_17\\run_01\\first_person\\A300_THREE_PEOPLE_FIRST_PERSON.mp4",
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "r_frame_rate": "10/1",
+      "nb_frames": "391",
+      "duration_s": 39.1,
+      "decoded": true,
+      "valid": true,
+      "review_image": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\REVIEW_circular_social_nav_robot.png",
+      "camera": "/World/RobotCamera",
+      "aligned": true,
+      "gt_shown": false,
+      "physical_human_count": 3
+    }
+  ]
+}

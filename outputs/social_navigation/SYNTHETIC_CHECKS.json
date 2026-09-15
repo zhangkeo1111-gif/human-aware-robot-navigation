@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "cases": [
+    "stationary_cost_order",
+    "future_crossing_rejected",
+    "behind_no_needless_stop",
+    "group_pair_and_bridge",
+    "covariance_inflation",
+    "stale_expiry",
+    "near_waypoint_progress",
+    "side_commitment",
+    "controller_import_isolation",
+    "frozen_sources_unchanged"
+  ],
+  "group_scope": "synthetic equal-other-cost ranking; not a human-group comfort validation"
+}

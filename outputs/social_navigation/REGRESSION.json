@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "scope": "Short startup/perception/legacy-controller smoke; formal runs cover full NavWareSet behavior",
+  "runs": [
+    {
+      "scene": "indoor",
+      "passed": true,
+      "source_run": "D:\\detection\\robot_human_isaac6\\outputs\\stage7_social_navigation_regression_1789511609136759000",
+      "rgb_frames": 50,
+      "yolo_samples": 48
+    },
+    {
+      "scene": "navwareset_frontal",
+      "passed": true,
+      "source_run": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\regression\\frontal\\baseline\\seed_17\\run_01",
+      "rgb_frames": 50,
+      "yolo_samples": 48
+    }
+  ]
+}

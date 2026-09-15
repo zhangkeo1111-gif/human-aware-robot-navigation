@@ -1,0 +1,46 @@
+[package]
+title = "Isaac 6 Lightweight Validation"
+version = "0.1.0"
+
+[dependencies]
+"omni.isaac.ml_archive" = { order = -100 }
+"omni.materialx.libs" = {}
+"omni.hydra.rtx" = {}
+"omni.kit.loop-isaac" = {}
+"omni.kit.renderer.core" = {}
+"omni.kit.renderer.init" = {}
+"omni.kit.viewport.window" = {}
+"omni.kit.viewport.utility" = {}
+"omni.physx" = {}
+"isaacsim.core.api" = {}
+
+[settings]
+app.name = "Isaac6Validation"
+app.version = "6.0.1"
+app.vulkan = true
+app.settings.persistent = false
+app.settings.fabricDefaultStageFrameHistoryCount = 3
+app.asyncRendering = false
+app.events.qualifiedNames = true
+app.gatherRenderResults = true
+app.useFabricSceneDelegate = true
+app.runLoops.main.manualModeEnabled = true
+app.runLoops.main.rateLimitEnabled = false
+app.player.useFixedTimeStepping = false
+rtx.hydra.supportMultiTickRate = true
+rtx.rendering.perSensorTickTlas = true
+rtx-transient.dlssg.enabled = false
+omni.replicator.asyncRendering = false
+app.fastShutdown = true
+app.file.ignoreUnsavedStage = true
+renderer.multiGpu.enabled = false
+renderer.multiGpu.autoEnable = false
+persistent.app.stage.upAxis = "Z"
+persistent.simulation.defaultMetersPerUnit = 1.0
+
+[settings.app.exts]
+folders = [
+    "D:/detection/robot_human_isaac6/runtime/exts",
+    "D:/detection/robot_human_isaac6/runtime/extscache",
+    "D:/detection/robot_human_isaac6/runtime/extsDeprecated",
+]

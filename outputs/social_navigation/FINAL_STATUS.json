@@ -1,0 +1,36 @@
+{
+  "status": "SOCIAL NAVIGATION FUNCTIONAL PASS",
+  "runs": 30,
+  "social_functional": 15,
+  "gates": {
+    "thirty_runs": true,
+    "all_social_functional": true,
+    "circular_three_people": true,
+    "social_cost_changes_choice": true,
+    "prediction_and_isolation_checks": true,
+    "side_hold_exercised": true,
+    "no_side_hold_violations": true,
+    "baseline_regression": true,
+    "videos_validated": true
+  },
+  "regression": {
+    "passed": true,
+    "scope": "Short startup/perception/legacy-controller smoke; formal runs cover full NavWareSet behavior",
+    "runs": [
+      {
+        "scene": "indoor",
+        "passed": true,
+        "source_run": "D:\\detection\\robot_human_isaac6\\outputs\\stage7_social_navigation_regression_1789511609136759000",
+        "rgb_frames": 50,
+        "yolo_samples": 48
+      },
+      {
+        "scene": "navwareset_frontal",
+        "passed": true,
+        "source_run": "D:\\detection\\robot_human_isaac6\\outputs\\social_navigation\\regression\\frontal\\baseline\\seed_17\\run_01",
+        "rgb_frames": 50,
+        "yolo_samples": 48
+      }
+    ]
+  }
+}

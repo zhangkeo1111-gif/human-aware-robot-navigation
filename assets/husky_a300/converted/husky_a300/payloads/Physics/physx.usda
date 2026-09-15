@@ -1,0 +1,55 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.3"
+    }
+    defaultPrim = "husky_a300"
+    doc = """Generated from Composed Stage of root layer C:\\Users\\86166\\AppData\\Local\\Temp\\tmpi7ftrf83\\husky_a300.usdc
+
+
+Generated from Composed Stage of root layer C:\\Users\\86166\\AppData\\Local\\Temp\\urdf_import_husky_a300_gy43zj2p\\usdex_husky_a300\\husky_a300.usdc
+
+
+Generated from Composed Stage of root layer C:\\Users\\86166\\AppData\\Local\\Temp\\urdf_import_husky_a300_gy43zj2p\\temp_husky_a300\\husky_a300.usd
+
+
+Generated from Composed Stage of root layer D:\\detection\\robot_human_isaac6\\assets\\husky_a300\\converted\\husky_a300\\payloads\\base.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    subLayers = [
+        @./physics.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "husky_a300"
+{
+    over "Physics"
+    {
+        over "front_left_wheel_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+        }
+
+        over "front_right_wheel_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+        }
+
+        over "rear_left_wheel_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+        }
+
+        over "rear_right_wheel_joint" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+        }
+    }
+}
+

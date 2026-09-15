@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="husky_a300">
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a300/a300.urdf.xacro"/>
+  <xacro:a300 control="diff_4wd" front_wheels="outdoor" rear_wheels="outdoor"/>
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a300/attachments/top_plate.urdf.xacro"/>
+  <xacro:top_plate name="top_plate"><origin xyz="0 0 0"/></xacro:top_plate>
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a300/attachments/bumper.urdf.xacro"/>
+  <xacro:bumper name="front_bumper" parent_link="front_bumper_mount"><origin xyz="0 0 0"/></xacro:bumper>
+  <xacro:bumper name="rear_bumper" parent_link="rear_bumper_mount"><origin xyz="0 0 0"/></xacro:bumper>
+</robot>

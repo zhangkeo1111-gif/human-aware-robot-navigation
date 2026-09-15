@@ -1,0 +1,103 @@
+{
+  "wheel_radius_m": 0.1651,
+  "track_width_m": 0.5468000000000001,
+  "wheelbase_m": 0.512,
+  "wheels": [
+    {
+      "name": "front_left_wheel_joint",
+      "xyz": [
+        0.256,
+        0.28290000000000004,
+        0.029129999999999996
+      ],
+      "axis": "0 1 0",
+      "limit": null
+    },
+    {
+      "name": "front_right_wheel_joint",
+      "xyz": [
+        0.256,
+        -0.2639,
+        0.029129999999999996
+      ],
+      "axis": "0 1 0",
+      "limit": null
+    },
+    {
+      "name": "rear_left_wheel_joint",
+      "xyz": [
+        -0.256,
+        0.28290000000000004,
+        0.029129999999999996
+      ],
+      "axis": "0 1 0",
+      "limit": null
+    },
+    {
+      "name": "rear_right_wheel_joint",
+      "xyz": [
+        -0.256,
+        -0.2639,
+        0.029129999999999996
+      ],
+      "axis": "0 1 0",
+      "limit": null
+    }
+  ],
+  "collision_bounds_base_m": [
+    [
+      -0.4977039694786072,
+      -0.32105000000000006,
+      -0.13597
+    ],
+    [
+      0.4977039694786072,
+      0.3400500000000001,
+      0.242259
+    ]
+  ],
+  "collision_dimensions_m": [
+    0.9954079389572144,
+    0.6611000000000001,
+    0.37822900000000004
+  ],
+  "conservative_radius_m": 0.6027795979748837,
+  "specified_mass_kg": 80.0,
+  "links_without_inertial": [
+    "base_link",
+    "chassis_left_suspension_mount",
+    "chassis_right_suspension_mount",
+    "front_bumper_mount",
+    "rear_bumper_mount",
+    "default_mount",
+    "left_suspension_beam_spacer_link",
+    "left_suspension_beam_link",
+    "left_suspension_beam_front_mount",
+    "left_suspension_beam_rear_mount",
+    "right_suspension_beam_spacer_link",
+    "right_suspension_beam_link",
+    "right_suspension_beam_front_mount",
+    "right_suspension_beam_rear_mount",
+    "front_left_motor_link",
+    "front_left_motor_mount",
+    "front_right_motor_link",
+    "front_right_motor_mount",
+    "rear_left_motor_link",
+    "rear_left_motor_mount",
+    "rear_right_motor_link",
+    "rear_right_motor_mount",
+    "base_footprint",
+    "top_plate_link",
+    "top_plate_default_mount",
+    "top_plate_front_mount",
+    "top_plate_rear_mount",
+    "front_bumper_link",
+    "rear_bumper_link"
+  ],
+  "spawn_z_m": 0.15597,
+  "camera_mount_m": [
+    0.37,
+    0.0,
+    0.5
+  ]
+}

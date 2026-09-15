@@ -1,0 +1,56 @@
+# Python, environments and local caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+/runtime/
+/downloads/
+*.log
+.cache/
+.cache_*/
+logs/
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# External model artifacts; dependencies are documented in REPRODUCIBILITY.md
+*.pt
+*.onnx
+*.engine
+*.mp4
+*.avi
+*.mov
+*.npz
+*.npy
+
+# Preserve external repositories in place, without importing nested Git histories.
+/assets/husky_a300/clearpath_common/
+/assets/husky_a300/source/
+
+# Generated runs are local. Only compact frozen research evidence is versioned.
+/outputs/*
+!/outputs/social_navigation/
+/outputs/social_navigation/*
+!/outputs/social_navigation/SOCIAL_NAVIGATION_REPORT.md
+!/outputs/social_navigation/SOCIAL_NAVIGATION_RESULTS.csv
+!/outputs/social_navigation/BENCHMARK_CONFIG_FROZEN.json
+!/outputs/social_navigation/FINAL_STATUS.json
+!/outputs/social_navigation/SYNTHETIC_CHECKS.json
+!/outputs/social_navigation/REGRESSION.json
+!/outputs/social_navigation/VIDEO_VALIDATION.json
+!/outputs/social_navigation/SOCIAL_COST_TOPDOWN.png
+!/outputs/social_navigation/SOCIAL_COST_TOPDOWN.svg
+# These six small source references are required by the existing frozen-source checks.
+!/outputs/social_navigation/baseline_source/
+/outputs/social_navigation/baseline_source/*
+!/outputs/social_navigation/baseline_source/demo_scene.py
+!/outputs/social_navigation/baseline_source/navwareset_scene.py
+!/outputs/social_navigation/baseline_source/robot_backend.py
+!/outputs/social_navigation/baseline_source/tracker.py
+!/outputs/social_navigation/baseline_source/yolo_worker.py
+!/outputs/social_navigation/baseline_source/walking_actor.py

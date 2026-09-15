@@ -1,0 +1,358 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.3"
+    }
+    defaultPrim = "husky_a300"
+    doc = """Generated from Composed Stage of root layer C:\\Users\\86166\\AppData\\Local\\Temp\\tmpi7ftrf83\\husky_a300.usdc
+
+
+Generated from Composed Stage of root layer C:\\Users\\86166\\AppData\\Local\\Temp\\urdf_import_husky_a300_gy43zj2p\\usdex_husky_a300\\husky_a300.usdc
+
+
+Generated from Composed Stage of root layer C:\\Users\\86166\\AppData\\Local\\Temp\\urdf_import_husky_a300_gy43zj2p\\temp_husky_a300\\husky_a300.usd
+
+
+Generated from Composed Stage of root layer D:\\detection\\robot_human_isaac6\\assets\\husky_a300\\converted\\husky_a300\\payloads\\base.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    subLayers = [
+        @./physics.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "husky_a300"
+{
+    over "Physics"
+    {
+        def MjcActuator "front_left_wheel_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, 0, -1.7453292608261108, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = inf
+            uniform double mjc:forceRange:min = -inf
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </husky_a300/Physics/front_left_wheel_joint>
+        }
+
+        def MjcActuator "front_right_wheel_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, 0, -1.7453292608261108, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = inf
+            uniform double mjc:forceRange:min = -inf
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </husky_a300/Physics/front_right_wheel_joint>
+        }
+
+        def MjcActuator "rear_left_wheel_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, 0, -1.7453292608261108, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = inf
+            uniform double mjc:forceRange:min = -inf
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </husky_a300/Physics/rear_left_wheel_joint>
+        }
+
+        def MjcActuator "rear_right_wheel_joint_actuator"
+        {
+            uniform double[] mjc:biasPrm = [0, 0, -1.7453292608261108, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:biasType = "affine"
+            uniform double mjc:forceRange:max = inf
+            uniform double mjc:forceRange:min = -inf
+            uniform double[] mjc:gainPrm = [1.7453292608261108, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            uniform token mjc:gainType = "fixed"
+            custom rel mjc:target
+            prepend rel mjc:target = </husky_a300/Physics/rear_right_wheel_joint>
+        }
+
+        over "front_left_wheel_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "front_right_wheel_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "rear_left_wheel_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+
+        over "rear_right_wheel_joint" (
+            delete apiSchemas = ["PhysicsDriveAPI:angular", "PhysicsJointStateAPI:angular"]
+        )
+        {
+        }
+    }
+
+    over "Geometry"
+    {
+        over "base_link"
+        {
+            over "front_left_wheel_link"
+            {
+                over "outdoor_left"
+                {
+                }
+
+                over "cylinder"
+                {
+                }
+            }
+
+            over "front_right_wheel_link"
+            {
+                over "outdoor_right"
+                {
+                }
+
+                over "cylinder"
+                {
+                }
+            }
+
+            over "rear_left_wheel_link"
+            {
+                over "outdoor_left"
+                {
+                }
+
+                over "cylinder"
+                {
+                }
+            }
+
+            over "rear_right_wheel_link"
+            {
+                over "outdoor_right"
+                {
+                }
+
+                over "cylinder"
+                {
+                }
+            }
+
+            over "chassis"
+            {
+                over "tn__Shape_IndexedFaceSet060_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet059_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet058_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet057_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet056_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet055_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet054_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet053_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet052_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet051_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet050_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet049_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet048_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet047_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet046_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet045_dZ0"
+                {
+                }
+            }
+
+            over "livery"
+            {
+                over "tn__Shape_IndexedFaceSet083_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet082_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet081_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet080_dZ0"
+                {
+                }
+            }
+
+            over "status_lights"
+            {
+                over "tn__Shape_IndexedFaceSet164_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet163_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet162_dZ0"
+                {
+                }
+
+                over "tn__Shape_IndexedFaceSet161_dZ0"
+                {
+                }
+            }
+
+            over "suspension_spacer"
+            {
+            }
+
+            over "suspension_beam"
+            {
+            }
+
+            over "suspension_spacer_1"
+            {
+            }
+
+            over "suspension_beam_1"
+            {
+            }
+
+            over "motor"
+            {
+            }
+
+            over "motor_1"
+            {
+            }
+
+            over "motor_2"
+            {
+            }
+
+            over "motor_3"
+            {
+            }
+
+            over "top_plate"
+            {
+            }
+
+            over "bumper"
+            {
+            }
+
+            over "bumper_1"
+            {
+            }
+
+            over "chassis_collision"
+            {
+            }
+
+            over "suspension_spacer_2"
+            {
+            }
+
+            over "suspension_beam_2"
+            {
+            }
+
+            over "suspension_spacer_3"
+            {
+            }
+
+            over "suspension_beam_3"
+            {
+            }
+
+            over "motor_4"
+            {
+            }
+
+            over "motor_5"
+            {
+            }
+
+            over "motor_6"
+            {
+            }
+
+            over "motor_7"
+            {
+            }
+
+            over "box"
+            {
+            }
+
+            over "bumper_collision"
+            {
+            }
+
+            over "bumper_collision_1"
+            {
+            }
+        }
+    }
+
+    over "Materials"
+    {
+    }
+
+    over "VisualMaterials"
+    {
+    }
+}
+
