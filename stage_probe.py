@@ -25,8 +25,11 @@ def main():
     parser.add_argument('--demo-scene',action='store_true')
     parser.add_argument('--demo-controller',action='store_true')
     parser.add_argument('--navwareset-scene',action='store_true')
+    parser.add_argument('--classic-scene',action='store_true')
+    parser.add_argument('--classic-scenario',choices=['headon','crossing','static_obstruction','overtaking','blind_corner'],default='headon')
+    parser.add_argument('--classic-diagnostic',action='store_true')
     parser.add_argument('--navwareset-scenario',choices=['frontal','obstruction','blind_corner','perpendicular','circular'],default='frontal')
-    parser.add_argument('--robot-behavior',choices=['social','non-social','social_nav'],default='social')
+    parser.add_argument('--robot-behavior',choices=['social','non-social','social_nav','active_passing'],default='social')
     parser.add_argument('--social-experiment',action='store_true')
     parser.add_argument('--seed',type=int,default=17)
     parser.add_argument('--run-phase',choices=['development','benchmark','regression'],default='development')
@@ -61,13 +64,14 @@ def main():
     parser.add_argument('--robust-depth',action='store_true')
     parser.add_argument('--lateral-avoidance',action='store_true')
     args, _ = parser.parse_known_args()
-    if args.record_first_person and not (args.navwareset_scene and args.navwareset_scenario in ('blind_corner','circular') and args.robot_behavior in ('social','social_nav')):
+    arena=args.navwareset_scene or args.classic_scene
+    if args.record_first_person and not (args.classic_scene or (args.navwareset_scene and args.navwareset_scenario in ('blind_corner','circular') and args.robot_behavior in ('social','social_nav'))):
         parser.error('First-person recording targets NavWareSet blind_corner or circular, social only')
-    if args.sim_seconds is None:args.sim_seconds=55. if args.navwareset_scene else 40. if args.demo_scene else 20.
+    if args.sim_seconds is None:args.sim_seconds=70. if args.classic_scene else 55. if args.navwareset_scene else 40. if args.demo_scene else 20.
     configuration = json.loads((ROOT/'config.yaml').read_text())
-    if args.robot_behavior=='social_nav':args.social_experiment=True
+    if args.robot_behavior=='social_nav' or args.classic_scene:args.social_experiment=True
     if args.social_experiment:
-        if not args.navwareset_scene:parser.error('--social-experiment requires --navwareset-scene')
+        if not arena:parser.error('--social-experiment requires a benchmark scene')
         import random
         import numpy as np
         random.seed(args.seed);np.random.seed(args.seed)
@@ -89,7 +93,14 @@ def main():
             nav_config['seed_scope']='Python/NumPy repeat seed; frozen character Randomizer(17), routes and assets unchanged'
         args.humans=len(nav_config['humans']);args.tracking_check=True;args.robust_depth=True;args.demo_controller=True
         if robot_config['name']!='a300' or motion_mode!='kinematic':parser.error('NavWareSet requires kinematic A300')
-    if args.demo_controller and not (args.demo_scene or args.navwareset_scene):parser.error('--demo-controller requires a demo scene')
+    if args.classic_scene:
+        if args.navwareset_scene or args.demo_scene or args.scenario or args.hfov is not None or args.second_view:parser.error('Classic cannot mix scenes or camera overrides')
+        if args.robot_behavior not in ('social','social_nav','active_passing'):parser.error('Unsupported classic controller')
+        from classic_single_scene import preset
+        nav_config=preset(args.classic_scenario)
+        args.humans=1;args.tracking_check=True;args.robust_depth=True;args.demo_controller=True
+        if robot_config['name']!='a300' or motion_mode!='kinematic':parser.error('Classic requires kinematic A300')
+    if args.demo_controller and not (args.demo_scene or arena):parser.error('--demo-controller requires a demo scene')
     if args.demo_controller and motion_mode!='kinematic':parser.error('Demo controller requires A300 kinematic mode; physical diagnostics remain available without --demo-controller.')
     if args.wheel_damping is not None: robot_config['wheel_damping']=args.wheel_damping
     if args.tire_friction is not None: robot_config['tire_friction']=args.tire_friction
@@ -126,6 +137,14 @@ def main():
             while (parent/f'run_{index:02d}').exists():index+=1
             output=parent/f'run_{index:02d}'
         print('NAVWARESET_OUTPUT',str(output),flush=True)
+    if args.classic_scene:
+        name='diagnostic' if args.classic_diagnostic else 'baseline' if args.robot_behavior=='social' else args.robot_behavior
+        experiment='active_passing' if args.robot_behavior=='active_passing' else 'classic_single_pedestrian'
+        parent=ROOT/'outputs'/experiment/args.run_phase/args.classic_scenario/name/f'seed_{args.seed}'
+        index=1
+        while (parent/f'run_{index:02d}').exists():index+=1
+        output=parent/f'run_{index:02d}'
+        print('CLASSIC_OUTPUT',str(output),flush=True)
     output.mkdir(parents=True, exist_ok=True)
     samples, stop = [], threading.Event()
     phase = ['startup']
@@ -170,7 +189,8 @@ def main():
     if args.record_first_person:
         from first_person_video import FirstPersonVideo
         filename = 'A300_THREE_PEOPLE_FIRST_PERSON.mp4' if args.navwareset_scenario=='circular' else 'A300_BLIND_CORNER_FIRST_PERSON.mp4'
-        first_person = FirstPersonVideo((output/'first_person') if args.social_experiment else output.parent/'first_person',filename,args.humans)
+        if args.classic_scene:filename=f'CLASSIC_{args.classic_scenario.upper()}_FIRST_PERSON.mp4'
+        first_person = FirstPersonVideo((output/'first_person') if args.social_experiment or args.classic_scene else output.parent/'first_person',filename,args.humans)
     try:
         if args.fractional_opacity:
             import carb
@@ -180,7 +200,7 @@ def main():
         if viewport is None:
             raise RuntimeError('No active viewport for renderer validation')
         viewport.set_texture_resolution((640, 360))
-        if args.navwareset_scene and args.headless:
+        if arena and args.headless:
             viewport.updates_enabled=False  # Unused UI only; sensor render products remain enabled.
             nav_config['unused_viewport_disabled']=True
         world, robot, controller, camera = None, None, None, None
@@ -224,6 +244,15 @@ def main():
                     demo_control=SocialController(configuration['social_navigation'],nav_config['robot_waypoints'],nav_geometry,
                         robot_config['conservative_radius_m'],{'linear_accel_m_s2':.5,'linear_decel_m_s2':.8,'angular_accel_rad_s2':1.2})
                 else:demo_control=nav_controller(nav_config,args.robot_behavior)
+                demo_rows=[]
+            if args.classic_scene:
+                from classic_single_scene import build,make_controller
+                nav_geometry=build(world.stage,ROOT/'classic_single_scene.usd',nav_config)
+                if args.robot_behavior=='active_passing':
+                    from active_passing_controller import ActivePassingController
+                    demo_control=ActivePassingController(configuration['social_navigation'],nav_config['robot_waypoints'],nav_geometry,
+                        robot_config['conservative_radius_m'],dict(linear_accel_m_s2=.5,linear_decel_m_s2=.8,angular_accel_rad_s2=1.2))
+                else:demo_control=make_controller(nav_config,nav_geometry,configuration,robot_config,args.robot_behavior,args.classic_diagnostic)
                 demo_rows=[]
             if args.stage >= 2:
                 import numpy as np
@@ -282,7 +311,11 @@ def main():
             if args.stage >= 5:
                 from walking_actor import load_actor
                 from omni.kit.async_engine import run_coroutine
-                task = run_coroutine(load_actor(world.stage, args.humans, args.construction_actor,'navwareset' if args.navwareset_scene else 'demo' if args.demo_scene else args.scenario))
+                if args.classic_scene:
+                    import NavSchema
+                    # Dynamic robot must not become a permanent hole in the human's static navmesh.
+                    NavSchema.NavMeshExcludeAPI.Apply(world.stage.GetPrimAtPath(robot_config['prim_path']))
+                task = run_coroutine(load_actor(world.stage, args.humans, args.construction_actor,'navwareset' if arena else 'demo' if args.demo_scene else args.scenario))
                 deadline = time.perf_counter()+240
                 while not task.done():
                     app.update()
@@ -325,7 +358,7 @@ def main():
                 import cv2
                 eye = np.array([5.,-7.,4.5]) if args.demo_scene else np.array([3.,-6.,4.])
                 forward = (np.array([4.,0.,.5]) if args.demo_scene else np.array([1.5,0.,.5]))-eye
-                if args.navwareset_scene:
+                if arena:
                     eye=np.array(nav_config['grs_camera']['eye']);forward=np.array(nav_config['grs_camera']['target'])-eye
                 forward /= np.linalg.norm(forward)
                 right = np.cross(forward,[0.,0.,1.]); right /= np.linalg.norm(right)
@@ -333,7 +366,7 @@ def main():
                 q = Rotation.from_matrix(np.column_stack((right,up,-forward))).as_quat()
                 demo_camera = RtxCamera('/World/DemoCamera',tick_rate=10.,translations=eye,orientations=np.array([q[3],*q[:3]]))
                 demo_camera.prims[0].GetAttribute('focalLength').Set(18.)
-                if args.navwareset_scene:
+                if arena:
                     demo_camera.prims[0].GetAttribute('focalLength').Set(9.)
                     nav_config['grs_camera']['focal_length_mm']=9.
                     nav_config['grs_camera']['horizontal_aperture_mm']=24.
@@ -341,7 +374,7 @@ def main():
                 demo_camera.prims[0].GetAttribute('horizontalAperture').Set(24.)
                 demo_camera.prims[0].GetAttribute('verticalAperture').Set(13.5)
                 demo_camera.camera.set_clipping_ranges(.05,100.)
-                demo_size=(960,540) if (args.demo_scene or args.navwareset_scene) else (1280,720)
+                demo_size=(960,540) if (args.demo_scene or arena) else (1280,720)
                 demo_sensor = CameraSensor(demo_camera,resolution=(demo_size[1],demo_size[0]),annotators=['rgb'])
                 demo_writer = cv2.VideoWriter(str(output/('curve_demo_raw.mp4' if args.curve_demo else 'avoidance_demo_raw.mp4')),cv2.VideoWriter_fourcc(*'mp4v'),10.,demo_size)
                 if not demo_writer.isOpened():
@@ -367,6 +400,9 @@ def main():
                         agent.set_speed(.65);agent.move_to(carb.Float3(*target),auto_brake=True)
                 if args.navwareset_scene:
                     from navwareset_scene import ScriptedPeople
+                    scripted_people=ScriptedPeople(evaluation_agents,nav_config)
+                if args.classic_scene:
+                    from classic_single_scene import ScriptedPeople
                     scripted_people=ScriptedPeople(evaluation_agents,nav_config)
                 if args.scenario:
                     import carb
@@ -413,7 +449,7 @@ def main():
             if not app.is_running():
                 raise RuntimeError('Application closed before measurement completed')
             if world:
-                if args.navwareset_scene:scripted_people.step(world.current_time-initial_sim)
+                if arena:scripted_people.step(world.current_time-initial_sim)
                 if args.distance_check:
                     distance = [1.5,2.,3.,4.,5.][min(int((world.current_time-initial_sim)/3),4)]
                     camera.set_local_poses(translations=np.array([3.-distance,0.,1.]))
@@ -446,7 +482,7 @@ def main():
                         segment=min(int((world.current_time-initial_sim)/4),len(motion_commands)-1)
                         command=motion_commands[segment]
                     if args.demo_controller:
-                        if args.robot_behavior=='social_nav':
+                        if args.robot_behavior in ('social_nav','active_passing') and not args.classic_diagnostic:
                             command=demo_control.step(world.current_time,current_tracks,measurement_time,robot.get_world_pose()[0],robot.yaw,robot.v,robot.w)
                         else:command=demo_control.step(world.current_time,current_tracks,measurement_time,robot.get_world_pose()[0],robot.yaw)
                     robot.apply_wheel_actions(controller.forward(command=np.array(command)))
@@ -469,6 +505,7 @@ def main():
                             title='Husky A300 | RGB-D human avoidance'
                             detail=f'Kinematic | {demo_control.state} | v={robot.v:.2f} m/s | Tracks: {len(current_tracks)}'
                         if args.navwareset_scene:title=f'NavWareSet-style | {args.navwareset_scenario} | {args.robot_behavior}'
+                        if args.classic_scene:title=f'Classic | {args.classic_scenario} | {"OPEN LOOP" if args.classic_diagnostic else args.robot_behavior}'
                         cv2.putText(frame,title,(24,30),cv2.FONT_HERSHEY_SIMPLEX,.8,(255,255,255),2)
                         cv2.putText(frame,f'Simulation time: {world.current_time-initial_sim:.1f}s   {detail}',(24,61),cv2.FONT_HERSHEY_SIMPLEX,.55,(220,220,220),1)
                         demo_writer.write(frame)
@@ -479,8 +516,9 @@ def main():
                     if args.demo_controller:
                         rp,_=robot.get_world_pose()
                         demo_rows.append({'time':world.current_time-initial_sim,'state':demo_control.state,'command':command,'robot_position':rp.tolist(),'speed':robot.v,'omega':robot.w,'estimated_risks':demo_control.risks,'evaluation_people':people_history[-1][1].tolist(),'evaluation_min_distance':min(float(np.linalg.norm(rp[:2]-p[:2])) for p in people_history[-1][1]),'route_done':demo_control.done})
-                        if args.navwareset_scene:demo_rows[-1]['robot_yaw']=robot.yaw
-                        if args.robot_behavior=='social_nav':demo_rows[-1]['selected_primitive']=demo_control.selected
+                        if arena:demo_rows[-1]['robot_yaw']=robot.yaw
+                        if args.classic_scene:demo_rows[-1]['estimated_tracks']=current_tracks
+                        if args.robot_behavior in ('social_nav','active_passing') and not args.classic_diagnostic:demo_rows[-1]['selected_primitive']=demo_control.selected
                     if args.scenario:
                         rp,rq = robot.get_world_pose()
                         risk_rows.append({'sim_time':world.current_time,'robot_position':rp.tolist(),
@@ -564,6 +602,10 @@ def main():
                             if first_person is not None:
                                 exposure_row = next((r for r in reversed(demo_rows) if r['time'] <= stamp-initial_sim+1e-7), demo_rows[0])
                                 first_person.capture(rgb,camera_frames,stamp,stamp-initial_sim,exposure_row['state'],exposure_row['speed'],exposure_row.get('selected_primitive'))
+                            if args.classic_scene and args.classic_scenario=='blind_corner':
+                                from PIL import Image
+                                (output/'visibility_rgb').mkdir(exist_ok=True)
+                                Image.fromarray(rgb).save(output/'visibility_rgb'/f'{stamp-initial_sim:09.4f}.png')
                             if bridge is not None:
                                 completed = bridge.poll()
                                 bridge.submit(rgb.copy(),camera_frames,stamp,(rgb.copy(),depth_values,params,view_index))
@@ -656,7 +698,7 @@ def main():
                             sample = {'sim_time':world.current_time-initial_sim,
                                 'nominal_depth_m':distance if args.distance_check else None, **response}
                             detections.append(sample)
-                            if args.navwareset_scene:
+                            if arena:
                                 sample['controller_state']=demo_control.state
                                 sample['response_elapsed_s']=world.current_time-initial_sim
                                 sample['exposure_elapsed_s']=stamp-initial_sim
@@ -665,12 +707,12 @@ def main():
                                 or (not response['boxes'] and sum(not d['boxes'] for d in detections) <= 20))
                             if args.demo_controller and response['boxes'] and demo_control.state not in annotated_demo_states:
                                 save_frame=True;annotated_demo_states.add(demo_control.state)
-                            if args.navwareset_scene and camera_frames % 10 == 0:save_frame=True
+                            if arena and camera_frames % 10 == 0:save_frame=True
                             if save_frame:
                                 from PIL import Image, ImageDraw
                                 im = Image.fromarray(rgb)
                                 stem = f'detection_{camera_frames:04d}'
-                                if args.navwareset_scene:sample['evidence_frame']=stem
+                                if arena:sample['evidence_frame']=stem
                                 im.save(output/(stem+'_rgb.png'))
                                 if args.navwareset_scene and depth_values is not None:
                                     np.savez_compressed(output/(stem+'_depth.npz'),depth_m=depth_values,exposure_sim_time=stamp,
@@ -744,7 +786,7 @@ def main():
         result['robot_backend'] = robot_config
         if args.demo_controller:
             (output/'demo_evaluation.json').write_text(json.dumps(demo_rows,indent=2))
-            if args.robot_behavior=='social_nav':
+            if args.robot_behavior in ('social_nav','active_passing') and not args.classic_diagnostic:
                 (output/'social_planning.json').write_text(json.dumps(demo_control.logs))
             result['demo']={'route_done':demo_control.done,'min_gt_distance':min(r['evaluation_min_distance'] for r in demo_rows),'states':sorted(set(r['state'] for r in demo_rows)),'geometric_collision_threshold':robot_config['conservative_radius_m']+.3}
         if args.navwareset_scene:
@@ -758,6 +800,11 @@ def main():
                     'polygons':nav_geometry},indent=2))
             (output/'position_evaluation.json').write_text(json.dumps(position_rows,indent=2))
             result['navwareset']={'scenario':args.navwareset_scenario,'behavior':args.robot_behavior,'exact_reconstruction':False,'gt_in_control':False}
+        if args.classic_scene:
+            from classic_single_scene import save_dataset
+            nav_config['initial_sim_time']=initial_sim
+            save_dataset(output,nav_config,nav_geometry,demo_rows,robot_config,args.robot_behavior,evaluation_paths)
+            result['classic']={'scenario':args.classic_scenario,'diagnostic':args.classic_diagnostic,'gt_in_control':False}
         if backend_rows:
             (output/'robot_backend.json').write_text(json.dumps(backend_rows,indent=2))
             if args.motion_test or args.motion_matrix or args.curve_demo:
@@ -823,7 +870,7 @@ def main():
             if args.demo_controller:
                 subprocess.run(['ffmpeg','-y','-hide_banner','-loglevel','error','-i',str(output/'avoidance_demo_raw.mp4'),
                     '-c:v','libx264','-preset','fast','-crf','20','-pix_fmt','yuv420p','-movflags','+faststart',
-                    str(output/(f'NAVWARESET_{args.navwareset_scenario.upper()}.mp4' if args.navwareset_scene else 'A300_HUMAN_AVOIDANCE_DEMO.mp4'))],check=True,timeout=120,creationflags=subprocess.CREATE_NO_WINDOW)
+                    str(output/(f'CLASSIC_{args.classic_scenario.upper()}.mp4' if args.classic_scene else f'NAVWARESET_{args.navwareset_scenario.upper()}.mp4' if args.navwareset_scene else 'A300_HUMAN_AVOIDANCE_DEMO.mp4'))],check=True,timeout=120,creationflags=subprocess.CREATE_NO_WINDOW)
         if bridge is not None:
             bridge.close()
         if worker is not None:

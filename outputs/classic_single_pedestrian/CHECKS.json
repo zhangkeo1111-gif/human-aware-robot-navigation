@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "frozen_files": [
+    "social_controller.py",
+    "demo_scene.py",
+    "navwareset_scene.py",
+    "robot_backend.py",
+    "tracker.py",
+    "yolo_worker.py",
+    "walking_actor.py",
+    "config.yaml",
+    "first_person_video.py",
+    "indoor_demo_scene.usd",
+    "navwareset_style_scene.usd",
+    "VERSION"
+  ],
+  "route_local_rotation_test": true
+}

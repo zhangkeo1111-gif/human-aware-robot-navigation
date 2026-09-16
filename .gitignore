@@ -54,3 +54,16 @@ Thumbs.db
 !/outputs/social_navigation/baseline_source/tracker.py
 !/outputs/social_navigation/baseline_source/yolo_worker.py
 !/outputs/social_navigation/baseline_source/walking_actor.py
+
+# Compact evidence for the independent classic benchmark; raw runs stay local.
+!/outputs/classic_single_pedestrian/
+/outputs/classic_single_pedestrian/*
+!/outputs/classic_single_pedestrian/CLASSIC_SINGLE_CONFIG_FROZEN.json
+!/outputs/classic_single_pedestrian/CLASSIC_SINGLE_PEDESTRIAN_RESULTS.csv
+!/outputs/classic_single_pedestrian/CLASSIC_SINGLE_PEDESTRIAN_REPORT.md
+!/outputs/classic_single_pedestrian/GEOMETRY_VALIDATION.json
+!/outputs/classic_single_pedestrian/CHECKS.json
+!/outputs/classic_single_pedestrian/FINAL_STATUS.json
+!/outputs/classic_single_pedestrian/VIDEO_VALIDATION.json
+!/outputs/classic_single_pedestrian/CLASSIC_HEADON_TOPDOWN.png
+!/outputs/classic_single_pedestrian/CLASSIC_STATIC_TOPDOWN.png

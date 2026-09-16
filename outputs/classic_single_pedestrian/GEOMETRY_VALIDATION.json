@@ -1,0 +1,53 @@
+[
+  {
+    "scenario": "headon",
+    "source": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\development\\headon\\diagnostic\\seed_17\\run_04",
+    "checks": {
+      "real_conflict": true,
+      "one_human": true,
+      "human_motion": 7.385992860676198,
+      "opposite_motion": true
+    }
+  },
+  {
+    "scenario": "crossing",
+    "source": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\development\\crossing\\diagnostic\\seed_17\\run_02",
+    "checks": {
+      "real_conflict": true,
+      "one_human": true,
+      "human_motion": 5.85348889641036,
+      "crossed_centerline": true
+    }
+  },
+  {
+    "scenario": "static_obstruction",
+    "source": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\development\\static_obstruction\\diagnostic\\seed_17\\run_02",
+    "checks": {
+      "real_conflict": true,
+      "one_human": true,
+      "human_motion": 1.9989988766021756,
+      "remained_in_obstruction_zone": true
+    }
+  },
+  {
+    "scenario": "overtaking",
+    "source": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\development\\overtaking\\diagnostic\\seed_17\\run_05",
+    "checks": {
+      "real_conflict": true,
+      "one_human": true,
+      "human_motion": 6.233582481533675,
+      "robot_catches_human": true,
+      "human_continuous_forward_motion": true
+    }
+  },
+  {
+    "scenario": "blind_corner",
+    "source": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\development\\blind_corner\\diagnostic\\seed_17\\run_03",
+    "checks": {
+      "real_conflict": true,
+      "one_human": true,
+      "human_motion": 5.972784424944158,
+      "rgb_occlusion_review": true
+    }
+  }
+]

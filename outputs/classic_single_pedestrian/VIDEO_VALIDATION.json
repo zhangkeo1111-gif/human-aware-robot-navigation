@@ -1,0 +1,180 @@
+{
+  "technical_pass": true,
+  "visual_review": "All 14 contact sheets inspected; blind-corner raw emergence sequences inspected for all six formal runs. Sparse visual sampling, not every frame manually reviewed.",
+  "visual_observations": {
+    "headon": "Both robots stop on the route; the prescribed person overlaps/passes the robot. No active lateral pass. First-person boxes cover the person; only estimated ID/confidence/distance and controller state are shown.",
+    "static_obstruction": "Both controllers remain stopped behind the person; baseline has a small lateral displacement but no completed pass.",
+    "overtaking": "Baseline follows then stops; v0.3 follows the slower person with no lateral overtake.",
+    "crossing_blind_corner": "The single person crosses into the robot path. Blind-corner first-person initially shows only the wall; correct person boxes appear at the image edge and subsequently disappear. No GT overlay in first-person videos.",
+    "contact_sheet_padding": "Head-on first-person sheets have three distinct sampled indices; the fourth black tile is unused montage padding, not a black video frame.",
+    "timing_caveat": "Real continuous single runs, but missing returned robot-camera ticks compress first-person playback at fixed 10 fps. Use simulation logs for event timing; per-video ratios are recorded below."
+  },
+  "videos": [
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\headon\\baseline\\seed_17\\run_01\\CLASSIC_HEADON.mp4",
+      "duration": 35.3,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "353",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_01.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\headon\\baseline\\seed_17\\run_01\\first_person\\CLASSIC_HEADON_FIRST_PERSON.mp4",
+      "duration": 33.7,
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "r_frame_rate": "10/1",
+      "nb_frames": "337",
+      "recorded_simulation_span_s": 35.2,
+      "playback_duration_ratio": 0.9573863636363636,
+      "timing_note": "Unchanged first-person exporter encodes returned exposures at 10 fps; missed camera ticks compress playback. Use logged simulation timestamps for event timing.",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_02.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\headon\\social_nav\\seed_17\\run_01\\CLASSIC_HEADON.mp4",
+      "duration": 39.7,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "397",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_03.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\headon\\social_nav\\seed_17\\run_01\\first_person\\CLASSIC_HEADON_FIRST_PERSON.mp4",
+      "duration": 38.1,
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "r_frame_rate": "10/1",
+      "nb_frames": "381",
+      "recorded_simulation_span_s": 39.6,
+      "playback_duration_ratio": 0.9621212121212122,
+      "timing_note": "Unchanged first-person exporter encodes returned exposures at 10 fps; missed camera ticks compress playback. Use logged simulation timestamps for event timing.",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_04.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\crossing\\baseline\\seed_17\\run_01\\CLASSIC_CROSSING.mp4",
+      "duration": 31.4,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "314",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_05.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\crossing\\social_nav\\seed_17\\run_01\\CLASSIC_CROSSING.mp4",
+      "duration": 32.8,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "328",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_06.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\static_obstruction\\baseline\\seed_17\\run_01\\CLASSIC_STATIC_OBSTRUCTION.mp4",
+      "duration": 70.0,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "700",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_07.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\static_obstruction\\social_nav\\seed_17\\run_01\\CLASSIC_STATIC_OBSTRUCTION.mp4",
+      "duration": 70.0,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "700",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_08.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\overtaking\\baseline\\seed_17\\run_01\\CLASSIC_OVERTAKING.mp4",
+      "duration": 70.0,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "700",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_09.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\overtaking\\social_nav\\seed_17\\run_01\\CLASSIC_OVERTAKING.mp4",
+      "duration": 47.8,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "478",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_10.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\blind_corner\\baseline\\seed_17\\run_01\\CLASSIC_BLIND_CORNER.mp4",
+      "duration": 31.4,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "314",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_11.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\blind_corner\\baseline\\seed_17\\run_01\\first_person\\CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4",
+      "duration": 27.6,
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "r_frame_rate": "10/1",
+      "nb_frames": "276",
+      "recorded_simulation_span_s": 31.2,
+      "playback_duration_ratio": 0.8846153846153847,
+      "timing_note": "Unchanged first-person exporter encodes returned exposures at 10 fps; missed camera ticks compress playback. Use logged simulation timestamps for event timing.",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_12.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\blind_corner\\social_nav\\seed_17\\run_01\\CLASSIC_BLIND_CORNER.mp4",
+      "duration": 32.8,
+      "codec_name": "h264",
+      "width": 960,
+      "height": 540,
+      "r_frame_rate": "10/1",
+      "nb_frames": "328",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_13.png"
+    },
+    {
+      "file": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\benchmark\\blind_corner\\social_nav\\seed_17\\run_01\\first_person\\CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4",
+      "duration": 29.6,
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 720,
+      "r_frame_rate": "10/1",
+      "nb_frames": "296",
+      "recorded_simulation_span_s": 32.7,
+      "playback_duration_ratio": 0.9051987767584098,
+      "timing_note": "Unchanged first-person exporter encodes returned exposures at 10 fps; missed camera ticks compress playback. Use logged simulation timestamps for event timing.",
+      "technical_pass": true,
+      "contact_sheet": "D:\\detection\\robot_human_isaac6\\outputs\\classic_single_pedestrian\\VIDEO_REVIEW_14.png"
+    }
+  ]
+}
