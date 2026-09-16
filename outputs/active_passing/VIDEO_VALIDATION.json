@@ -1,0 +1,10 @@
+{
+  "source_run": "development/static_obstruction/active_passing/seed_17/run_03",
+  "continuous_single_run": true,
+  "first_person": {"codec": "h264", "width": 1280, "height": 720, "fps": 10, "frames": 699, "duration_s": 69.9, "full_decode_pass": true, "gt_overlay": false, "exposure_alignment_asserted_by_existing_recorder": true},
+  "third_person": {"codec": "h264", "width": 960, "height": 540, "fps": 10, "frames": 700, "duration_s": 70.0, "full_decode_pass": true},
+  "visual_review": "First-person six-frame contact sheet inspected. Person initially detected, moves to left image edge during RIGHT offset, disappears; EMERGENCY_STOP is shown. This is failed maneuver evidence, not a passing demonstration.",
+  "timing": "Use simulation logs, not player clock, for event times. Existing camera recorder encodes returned exposures only.",
+  "unrun_videos": ["headon", "overtaking"],
+  "unrun_reason": "Static mechanism gate failed; later scenes prohibited by protocol."
+}

@@ -1,0 +1,9 @@
+{
+  "release_gate": "FAIL",
+  "reason": "STATIC_MECHANISM_GATE_NOT_PASSED",
+  "formal_active_runs": 0,
+  "development_runs": 3,
+  "protected_files_unchanged": true,
+  "main_unchanged": true,
+  "release": false
+}
