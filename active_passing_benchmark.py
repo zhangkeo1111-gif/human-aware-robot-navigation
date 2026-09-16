@@ -35,7 +35,7 @@ def run(scene,repeat,phase):
     cmd=[str(ROOT/'runtime/python.bat'),'stage_probe.py','--stage','7','--robot-model','a300','--motion-mode','kinematic',
         '--classic-scene','--classic-scenario',scene,'--robot-behavior','active_passing','--seed',str(repeat),
         '--run-phase',phase,'--headless','--seconds','300','--record-demo']
-    if scene=='headon':cmd+=['--record-first-person']
+    if scene in ('headon','static_obstruction'):cmd+=['--record-first-person']
     with log.open('w') as f:result=subprocess.run(cmd,cwd=ROOT,stdout=f,stderr=subprocess.STDOUT)
     folder=parent/f'run_{index:02d}'
     if result.returncode or not (folder/'summary.json').exists():

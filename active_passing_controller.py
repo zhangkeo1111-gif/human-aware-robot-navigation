@@ -109,11 +109,14 @@ class ActivePassingController(SocialController):
         target=next((h for h in humans if h['id']==self.target),None)
         if target is None and self.last_target is not None:
             stamp,old=self.last_target;age=now-stamp
-            if age<=self.c['stale_age']:
+            if old['age']+age<=self.c['stale_age']:
                 predicted=old['pos']+old['velocity']*age
                 matches=[h for h in humans if np.linalg.norm(h['pos']-predicted)<.8]
                 if len(matches)==1:
                     target=matches[0];self.target=target['id']
+                elif not matches:
+                    target=dict(old,pos=predicted,age=old['age']+age,predicted=predicted+self.times[:,None]*old['velocity'])
+                    humans.append(target)
         if target is not None:self.last_target=(now,target)
         if self.phase=='EMERGENCY_STOP' and target is not None and abs(v)<.03:
             self.replans+=1
@@ -131,7 +134,7 @@ class ActivePassingController(SocialController):
                 self.phase='PASS_INIT'
                 valid,score,candidate_log=self.assess(p,yaw,v,omega,paths,humans)
                 if valid.any():
-                    i=int(np.argmin(np.where(valid,score,np.inf)));self.offset=self.OFFSETS[i]
+                    i=int(np.argmin(np.where(valid,np.round(score,9),np.inf)));self.offset=self.OFFSETS[i]
                     self.full_path=paths[i]
                     ss=np.arange(sd[0],self.local(self.waypoints[-1])[0]+.051,.05)
                     dd=sd[1]+(self.offset-sd[1])*self.smooth((ss-sd[0])/max(1.6,abs(self.offset-sd[1])*2.))

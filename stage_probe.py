@@ -252,6 +252,8 @@ def main():
                     from active_passing_controller import ActivePassingController
                     demo_control=ActivePassingController(configuration['social_navigation'],nav_config['robot_waypoints'],nav_geometry,
                         robot_config['conservative_radius_m'],dict(linear_accel_m_s2=.5,linear_decel_m_s2=.8,angular_accel_rad_s2=1.2))
+                    import inspect
+                    (output/'active_controller_source.py').write_text(inspect.getsource(__import__('active_passing_controller')),encoding='utf8')
                 else:demo_control=make_controller(nav_config,nav_geometry,configuration,robot_config,args.robot_behavior,args.classic_diagnostic)
                 demo_rows=[]
             if args.stage >= 2:
