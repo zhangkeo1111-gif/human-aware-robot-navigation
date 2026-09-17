@@ -82,6 +82,7 @@ Thumbs.db
 !/outputs/active_passing_v2/
 /outputs/active_passing_v2/*
 !/outputs/active_passing_v2/ACTIVE_PASSING_V2_REPORT.md
+!/outputs/active_passing_v2/ACTIVE_PASSING_V2_FAILURE_ANALYSIS.md
 !/outputs/active_passing_v2/ACTIVE_PASSING_V2_DEVELOPMENT_RESULTS.csv
 !/outputs/active_passing_v2/ACTIVE_PASSING_V2_STATIC_TOPDOWN.png
 !/outputs/active_passing_v2/FINAL_STATUS.json

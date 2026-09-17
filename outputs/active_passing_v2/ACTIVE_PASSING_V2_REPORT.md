@@ -34,6 +34,8 @@ The final static runs used the live `CameraParams` model: resolution [640, 360],
 ## Failure evidence
 The latest run (run 08) reached route-local s=2.481 m and d=-0.644 m, remaining in `OFFSET`; it never entered `PARALLEL`, `RECOVER` or `PASS_DONE`. At the final same-side replan, no candidate was valid: the diagnostics recorded collision and predicted-visibility rejection. The controller then latched `EMERGENCY_STOP`. This is a causal estimated-track feasibility failure, not a successful pass and not evidence that a static person was safely passed.
 
+Detailed root-cause analysis: [ACTIVE_PASSING_V2_FAILURE_ANALYSIS.md](D:/detection/robot_human_isaac6/outputs/active_passing_v2/ACTIVE_PASSING_V2_FAILURE_ANALYSIS.md).
+
 ![Evaluation-only diagnostic](D:/detection/robot_human_isaac6/outputs/active_passing_v2/ACTIVE_PASSING_V2_STATIC_TOPDOWN.png)
 
 ## Gate decision
