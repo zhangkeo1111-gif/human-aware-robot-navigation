@@ -76,3 +76,13 @@ Thumbs.db
 !/outputs/active_passing/ACTIVE_PASSING_STATIC_TOPDOWN.png
 !/outputs/active_passing/FINAL_STATUS.json
 !/outputs/active_passing/VIDEO_VALIDATION.json
+
+# Compact evidence for the independent ActivePassingControllerV2 gate; raw
+# runs, videos and per-run traces remain local and are intentionally ignored.
+!/outputs/active_passing_v2/
+/outputs/active_passing_v2/*
+!/outputs/active_passing_v2/ACTIVE_PASSING_V2_REPORT.md
+!/outputs/active_passing_v2/ACTIVE_PASSING_V2_DEVELOPMENT_RESULTS.csv
+!/outputs/active_passing_v2/ACTIVE_PASSING_V2_STATIC_TOPDOWN.png
+!/outputs/active_passing_v2/FINAL_STATUS.json
+!/outputs/active_passing_v2/VIDEO_VALIDATION.json

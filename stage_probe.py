@@ -29,7 +29,7 @@ def main():
     parser.add_argument('--classic-scenario',choices=['headon','crossing','static_obstruction','overtaking','blind_corner'],default='headon')
     parser.add_argument('--classic-diagnostic',action='store_true')
     parser.add_argument('--navwareset-scenario',choices=['frontal','obstruction','blind_corner','perpendicular','circular'],default='frontal')
-    parser.add_argument('--robot-behavior',choices=['social','non-social','social_nav','active_passing'],default='social')
+    parser.add_argument('--robot-behavior',choices=['social','non-social','social_nav','active_passing','active_passing_v2'],default='social')
     parser.add_argument('--social-experiment',action='store_true')
     parser.add_argument('--seed',type=int,default=17)
     parser.add_argument('--run-phase',choices=['development','benchmark','regression'],default='development')
@@ -57,7 +57,7 @@ def main():
     parser.add_argument('--sim-seconds',type=float,default=None)
     parser.add_argument('--depth-audit',action='store_true')
     parser.add_argument('--observation-audit',action='store_true')
-    parser.add_argument('--hfov',type=float,default=None)
+    parser.add_argument('--hfov','--camera-hfov',type=float,default=None)
     parser.add_argument('--second-view',action='store_true')
     parser.add_argument('--record-demo',action='store_true')
     parser.add_argument('--record-first-person',action='store_true')
@@ -94,8 +94,9 @@ def main():
         args.humans=len(nav_config['humans']);args.tracking_check=True;args.robust_depth=True;args.demo_controller=True
         if robot_config['name']!='a300' or motion_mode!='kinematic':parser.error('NavWareSet requires kinematic A300')
     if args.classic_scene:
-        if args.navwareset_scene or args.demo_scene or args.scenario or args.hfov is not None or args.second_view:parser.error('Classic cannot mix scenes or camera overrides')
-        if args.robot_behavior not in ('social','social_nav','active_passing'):parser.error('Unsupported classic controller')
+        if args.navwareset_scene or args.demo_scene or args.scenario or args.second_view:parser.error('Classic cannot mix scenes or cameras')
+        if args.hfov is not None and not (args.robot_behavior=='active_passing_v2' and args.hfov==120):parser.error('Only explicit v2 wide120 ablation is permitted')
+        if args.robot_behavior not in ('social','social_nav','active_passing','active_passing_v2'):parser.error('Unsupported classic controller')
         from classic_single_scene import preset
         nav_config=preset(args.classic_scenario)
         args.humans=1;args.tracking_check=True;args.robust_depth=True;args.demo_controller=True
@@ -139,7 +140,8 @@ def main():
         print('NAVWARESET_OUTPUT',str(output),flush=True)
     if args.classic_scene:
         name='diagnostic' if args.classic_diagnostic else 'baseline' if args.robot_behavior=='social' else args.robot_behavior
-        experiment='active_passing' if args.robot_behavior=='active_passing' else 'classic_single_pedestrian'
+        experiment=args.robot_behavior if args.robot_behavior in ('active_passing','active_passing_v2') else 'classic_single_pedestrian'
+        if args.robot_behavior=='active_passing_v2':name+='_'+('wide120' if args.hfov else 'default')
         parent=ROOT/'outputs'/experiment/args.run_phase/args.classic_scenario/name/f'seed_{args.seed}'
         index=1
         while (parent/f'run_{index:02d}').exists():index+=1
@@ -248,7 +250,13 @@ def main():
             if args.classic_scene:
                 from classic_single_scene import build,make_controller
                 nav_geometry=build(world.stage,ROOT/'classic_single_scene.usd',nav_config)
-                if args.robot_behavior=='active_passing':
+                if args.robot_behavior=='active_passing_v2':
+                    from active_passing_v2 import ActivePassingControllerV2
+                    demo_control=ActivePassingControllerV2(configuration['social_navigation'],nav_config['robot_waypoints'],nav_geometry,
+                        robot_config['conservative_radius_m'],dict(linear_accel_m_s2=.5,linear_decel_m_s2=.8,angular_accel_rad_s2=1.2),camera_mount=robot_config['camera_mount_m'])
+                    import inspect
+                    (output/'active_v2_source.py').write_text(inspect.getsource(__import__('active_passing_v2')),encoding='utf8')
+                elif args.robot_behavior=='active_passing':
                     from active_passing_controller import ActivePassingController
                     demo_control=ActivePassingController(configuration['social_navigation'],nav_config['robot_waypoints'],nav_geometry,
                         robot_config['conservative_radius_m'],dict(linear_accel_m_s2=.5,linear_decel_m_s2=.8,angular_accel_rad_s2=1.2))
@@ -484,7 +492,7 @@ def main():
                         segment=min(int((world.current_time-initial_sim)/4),len(motion_commands)-1)
                         command=motion_commands[segment]
                     if args.demo_controller:
-                        if args.robot_behavior in ('social_nav','active_passing') and not args.classic_diagnostic:
+                        if args.robot_behavior in ('social_nav','active_passing','active_passing_v2') and not args.classic_diagnostic:
                             command=demo_control.step(world.current_time,current_tracks,measurement_time,robot.get_world_pose()[0],robot.yaw,robot.v,robot.w)
                         else:command=demo_control.step(world.current_time,current_tracks,measurement_time,robot.get_world_pose()[0],robot.yaw)
                     robot.apply_wheel_actions(controller.forward(command=np.array(command)))
@@ -520,7 +528,7 @@ def main():
                         demo_rows.append({'time':world.current_time-initial_sim,'state':demo_control.state,'command':command,'robot_position':rp.tolist(),'speed':robot.v,'omega':robot.w,'estimated_risks':demo_control.risks,'evaluation_people':people_history[-1][1].tolist(),'evaluation_min_distance':min(float(np.linalg.norm(rp[:2]-p[:2])) for p in people_history[-1][1]),'route_done':demo_control.done})
                         if arena:demo_rows[-1]['robot_yaw']=robot.yaw
                         if args.classic_scene:demo_rows[-1]['estimated_tracks']=current_tracks
-                        if args.robot_behavior in ('social_nav','active_passing') and not args.classic_diagnostic:demo_rows[-1]['selected_primitive']=demo_control.selected
+                        if args.robot_behavior in ('social_nav','active_passing','active_passing_v2') and not args.classic_diagnostic:demo_rows[-1]['selected_primitive']=demo_control.selected
                     if args.scenario:
                         rp,rq = robot.get_world_pose()
                         risk_rows.append({'sim_time':world.current_time,'robot_position':rp.tolist(),
@@ -588,6 +596,7 @@ def main():
                                     continue
                                 last_exposure_stamp[view_index]=stamp
                                 params = {k:(v.copy() if hasattr(v,'copy') else v) for k,v in camera_params.get_data().items()}
+                                if args.robot_behavior=='active_passing_v2':demo_control.set_camera(params)
                                 if args.observation_audit and 2.8<=stamp<=4.4:
                                     np.savez_compressed(output/f'exposure_{camera_frames:04d}.npz',rgb=rgb,depth=depth_values,
                                         sim_time=stamp,robot_pose=robot.get_world_pose()[0],
@@ -788,8 +797,11 @@ def main():
         result['robot_backend'] = robot_config
         if args.demo_controller:
             (output/'demo_evaluation.json').write_text(json.dumps(demo_rows,indent=2))
-            if args.robot_behavior in ('social_nav','active_passing') and not args.classic_diagnostic:
+            if args.robot_behavior in ('social_nav','active_passing','active_passing_v2') and not args.classic_diagnostic:
                 (output/'social_planning.json').write_text(json.dumps(demo_control.logs))
+                if args.robot_behavior=='active_passing_v2':
+                    (output/'passing_candidates.json').write_text(json.dumps(demo_control.candidate_history))
+                    (output/'passing_camera_model.json').write_text(json.dumps(demo_control.camera_model,indent=2))
             result['demo']={'route_done':demo_control.done,'min_gt_distance':min(r['evaluation_min_distance'] for r in demo_rows),'states':sorted(set(r['state'] for r in demo_rows)),'geometric_collision_threshold':robot_config['conservative_radius_m']+.3}
         if args.navwareset_scene:
             from navwareset_scene import save_dataset

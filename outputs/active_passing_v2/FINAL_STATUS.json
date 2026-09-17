@@ -1,0 +1,15 @@
+{
+  "release_gate": "FAIL",
+  "reason": "STATIC_MECHANISM_GATE_NOT_PASSED",
+  "static_runs": 8,
+  "static_successes": 0,
+  "consecutive_successes": 0,
+  "required_consecutive_successes": 2,
+  "headon_runs": 0,
+  "overtaking_runs": 0,
+  "formal_runs": 0,
+  "protected_files_unchanged": true,
+  "main_unchanged": true,
+  "version_unchanged": true,
+  "release": false
+}
