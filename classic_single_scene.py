@@ -3,7 +3,8 @@ import json
 import numpy as np
 from demo_scene import DemoController
 
-SCENARIOS=('headon','crossing','static_obstruction','overtaking','blind_corner')
+SCENARIOS=('headon','crossing','static_obstruction','overtaking','blind_corner',
+           'diagonal_crossing','side_offset_static','cut_in')
 
 def preset(name):
     # Crossing reaches y=0 at t=15 s, matching unimpeded robot x=4.5 m.
@@ -11,10 +12,14 @@ def preset(name):
            'crossing':([4.5,-2.5],[4.5,2.5],.65,15.-2.5/.65),
            'static_obstruction':([4.5,0.],[4.5,0.],0.,0.),
            'overtaking':([1.8,0.],[10.,0.],.20,0.),
-           'blind_corner':([4.5,2.5],[4.5,-2.5],.65,15.-2.5/.65)}
+           'blind_corner':([4.5,2.5],[4.5,-2.5],.65,15.-2.5/.65),
+           # Nominal 0.35 m/s robot reaches the diagonal midpoint at ~14.3 s.
+           'diagonal_crossing':([3.5,-2.3],[6.5,2.3],.60,5./.35-np.hypot(1.5,2.3)/.60),
+           'side_offset_static':([4.5,-.6],[4.5,-.6],0.,0.),
+           'cut_in':([2.5,-2.0],[5.5,.2],.50,7.)}
     start,goal,speed,delay=specs[name]
     return dict(scenario=name,robot_start=[0.,0.,0.],robot_waypoints=[[9.,0.]],timeout_s=70.,
-        humans=[dict(start=start+[0.],goals=[goal+[0.]],speed=speed,delay=delay)],
+        humans=[dict(start=start+[0.],goals=[goal+[0.]]+([[10.5,.2,0.]] if name=='cut_in' else []),speed=speed,delay=delay)],
         bounds_xy=[[-1.,-3.],[11.,3.]],
         grs_camera=dict(eye=[-1.,-5.,5.],target=[5.,0.,0.],resolution=[960,540],rate_hz=10),
         blind_wall=dict(center=[1.4,.825,1.3],size=[2.8,.15,2.6]) if name=='blind_corner' else None,
@@ -59,7 +64,7 @@ class ScriptedPeople:
         import carb
         import omni.anim.navigation.core as navigation
         assert len(agents)==1
-        self.agent=agents[0];self.spec=config['humans'][0];self.started=False
+        self.agent=agents[0];self.spec=config['humans'][0];self.started=False;self.goal_index=0
         self.agent.set_auto_avoidance_enabled(False)
         self.agent.set_obstacle_avoidance_enabled(False)
         if not self.agent.teleport(carb.Float3(*self.spec['start'])):raise RuntimeError('Classic teleport failed')
@@ -72,6 +77,12 @@ class ScriptedPeople:
             result=self.agent.move_to(carb.Float3(*self.spec['goals'][0]),auto_brake=True);self.started=True
             print('CLASSIC_MOVE_RESULT',str(result),flush=True)
             if result == -1:raise RuntimeError('Classic human goal rejected by navigation mesh')
+        elif self.started and self.goal_index+1<len(self.spec['goals']):
+            q=self.agent.get_world_translation()
+            if np.linalg.norm(np.array([q.x,q.y])-np.array(self.spec['goals'][self.goal_index][:2]))<.25:
+                self.goal_index+=1
+                result=self.agent.move_to(carb.Float3(*self.spec['goals'][self.goal_index]),auto_brake=True)
+                if result == -1:raise RuntimeError('Classic human waypoint rejected')
 
 class DiagnosticRoute:
     """Open-loop scene validation: no perception or human state used for commands."""
