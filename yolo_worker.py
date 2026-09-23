@@ -56,12 +56,16 @@ def main():
     with contextlib.redirect_stdout(sys.stderr):
         import numpy as np
         import torch
+        import ultralytics
         from ultralytics import YOLO
         model = YOLO(sys.argv[1])
         person = next(k for k,v in model.names.items() if v == 'person')
         model.predict(np.zeros((360,640,3), dtype=np.uint8), classes=[person],
                       device=0, imgsz=640, conf=.25, verbose=False)
     print(json.dumps({'ready': True, 'person_class': person, 'checkpoint': sys.argv[1],
+                      'model_task': model.task, 'ultralytics_version': ultralytics.__version__,
+                      'device': str(model.predictor.device),
+                      'confidence': .25, 'imgsz': 640,
                       'class_count': len(model.names),
                       'training_data_metadata': str(model.ckpt.get('train_args',{}).get('data'))}), flush=True)
     while True:

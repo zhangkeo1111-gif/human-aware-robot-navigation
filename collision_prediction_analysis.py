@@ -1,4 +1,5 @@
 """Post-run GT evaluation only; never imported by the online predictor."""
+import argparse
 import csv
 import json
 from pathlib import Path
@@ -74,6 +75,21 @@ def gt_at(rows, stamp, count):
     return position, velocity
 
 
+def overlapping_box_pairs(boxes):
+    """Count high-IoU box pairs as a detector-duplicate proxy, not GT precision."""
+    count = 0
+    for i, a in enumerate(boxes):
+        for b in boxes[i+1:]:
+            x1, y1 = max(a[0], b[0]), max(a[1], b[1])
+            x2, y2 = min(a[2], b[2]), min(a[3], b[3])
+            intersection = max(0., x2-x1)*max(0., y2-y1)
+            area_a = max(0., a[2]-a[0])*max(0., a[3]-a[1])
+            area_b = max(0., b[2]-b[0])*max(0., b[3]-b[1])
+            if intersection / max(area_a+area_b-intersection, 1e-9) > .8:
+                count += 1
+    return count
+
+
 def assess(case, seed=17):
     folder = ROOT / case / f'seed_{seed}'
     if not (folder/'summary.json').exists():
@@ -84,6 +100,7 @@ def assess(case, seed=17):
     count = len(summary['human_specs'])
     errors, velocity_errors = [], []
     current_ids = [None]*count
+    associated_ids = [set() for _ in range(count)]
     switches = 0
     duplicates = 0
     observed = 0
@@ -111,6 +128,7 @@ def assess(case, seed=17):
                 if current_ids[i] is not None and current_ids[i] != t['track_id']:
                     switches += 1
                 current_ids[i] = t['track_id']
+                associated_ids[i].add(t['track_id'])
             duplicates += max(0, len(active)-count)
         if frame['risks'] and first_risk_row is None and any(r['risk']=='COLLISION_RISK' for r in frame['risks']):
             first_risk_row = frame
@@ -128,7 +146,15 @@ def assess(case, seed=17):
     sustained = next((frames[i]['predictor_time'] for i in range(len(frames)-2)
                       if all(risk_flags[i:i+3])), None)
     first_ttc = next((r['predicted_ttc_s'] for r in first['risks'] if r['risk']=='COLLISION_RISK'), None) if first else None
+    confidences = [c for f in frames for c in f['confidence']]
     result = dict(scenario=case, seed=seed,
+                  detector=Path(summary['yolo']['checkpoint']).name,
+                  ultralytics_version=summary['yolo'].get('ultralytics_version'),
+                  device=summary['yolo'].get('device'),
+                  inference_count=len(frames),
+                  yolo_responses_per_wall_s=len(frames)/summary['wall_seconds'],
+                  yolo_mean_ms=float(np.mean([f['yolo_ms'] for f in frames])) if frames else None,
+                  yolo_p95_ms=float(np.percentile([f['yolo_ms'] for f in frames], 95)) if frames else None,
                   actual_collision=summary['actual_collision'],
                   predicted_collision=summary['predicted_collision'],
                   first_detection_time=summary['first_detection_time'],
@@ -147,13 +173,15 @@ def assess(case, seed=17):
                   min_actual_gt_distance=summary['min_actual_gt_distance_m'],
                   position_mae=position_mae, position_p95=position_p95,
                   velocity_mae=velocity_mae, id_switches=switches,
+                  track_fragmentation=sum(max(0, len(ids)-1) for ids in associated_ids),
                   duplicate_track_count=duplicates,
+                  duplicate_detection_pairs=sum(overlapping_box_pairs(f['boxes']) for f in frames),
                   false_alarm=bool(summary['predicted_collision'] and not summary['actual_collision']),
                   frames=len(frames), detected_frames=observed,
                   detection_continuity=observed/len(frames) if frames else None,
                   missed_exposure_ratio=1-observed/len(frames) if frames else None,
-                  mean_confidence=float(np.mean([c for f in frames for c in f['confidence']]))
-                                  if any(f['confidence'] for f in frames) else None,
+                  mean_confidence=float(np.mean(confidences)) if confidences else None,
+                  median_confidence=float(np.median(confidences)) if confidences else None,
                   exposure_to_predictor_p95_s=float(np.percentile(
                       [f['exposure_to_predictor_s'] for f in frames], 95)) if frames else None,
                   track_continuity=track_support/len(frames) if frames else None,
@@ -249,7 +277,7 @@ def plot(folder, case, truth, estimates, first_risk, summary):
     plt.close(fig)
 
 
-def main():
+def main(detector_label='YOLO11n'):
     rows = [r for case in CASES if (r := assess(case)) is not None]
     if not rows:
         raise SystemExit('No completed runs found')
@@ -275,7 +303,7 @@ def main():
         '## 1. Goal',
         'Test whether a fixed third-person RGB-D camera can predict robot–human collision proxies before they occur.', '',
         '## 2. System',
-        'Third-person RGB-D → official COCO YOLO11n person → torso robust depth → world XY → Hungarian + CV-KF → CPA/TTC and 5 s rollout. Robot ego state is known; human GT and scripted future routes are post-run evaluation only.', '',
+        f'Third-person RGB-D → official COCO {detector_label} person → torso robust depth → world XY → Hungarian + CV-KF → CPA/TTC and 5 s rollout. Robot ego state is known; human GT and scripted future routes are post-run evaluation only.', '',
         '## 3. Camera Setup',
         'One fixed `/World/CollisionPredictionCamera`, 640×360, 10 Hz simulation time; eye (5,−5,7) m, target (5,0,0) m; 18 mm focal length, 24 mm horizontal aperture (HFOV ≈ 67.38°), 13.5 mm vertical aperture. Same settings across runs. Exact camera intrinsics and view transform are in each `camera_params.json`.', '',
         '## 4. Collision Scenarios',
@@ -338,5 +366,194 @@ def main():
     print(f'EVALUATED {len(rows)} runs TP={tp} FP={fp} FN={fn} TN={tn}')
 
 
+def compare_detectors():
+    """Compare frozen YOLO11n results without rewriting any baseline artifact."""
+    old_root = Path(__file__).resolve().parent/'outputs'/'third_person_collision_prediction'
+    new_root = Path(__file__).resolve().parent/'outputs'/'third_person_collision_prediction_yolo26n'
+    with (old_root/'COLLISION_PREDICTION_RESULTS.csv').open(newline='') as handle:
+        old_rows = {r['scenario']: r for r in csv.DictReader(handle)}
+    with (new_root/'COLLISION_PREDICTION_RESULTS.csv').open(newline='') as handle:
+        new_rows = {r['scenario']: r for r in csv.DictReader(handle)}
+    if set(old_rows) != set(CASES) or set(new_rows) != set(CASES):
+        raise RuntimeError('Both detectors must have all nine frozen scenarios')
+    columns = ('scenario', 'detector', 'first_detection_time', 'detection_continuity',
+               'missed_exposure_ratio', 'mean_confidence', 'median_confidence',
+               'duplicate_detection_pairs', 'position_mae', 'position_p95',
+               'velocity_mae', 'id_switches', 'track_fragmentation',
+               'duplicate_track_count', 'track_continuity', 'actual_collision',
+               'predicted_collision', 'first_risk_time', 'actual_collision_time',
+               'lead_time', 'sustained_lead_time', 'predicted_ttc_at_first_risk',
+               'min_predicted_distance', 'false_alarm', 'inference_count',
+               'yolo_mean_ms', 'yolo_p95_ms', 'yolo_responses_per_wall_s')
+    all_rows = []
+    for case in CASES:
+        old_summary = json.loads((old_root/case/'seed_17'/'summary.json').read_text())
+        new_summary = json.loads((new_root/case/'seed_17'/'summary.json').read_text())
+        for summary, checkpoint in ((old_summary, 'yolo11n.pt'), (new_summary, 'yolo26n.pt')):
+            info = summary['yolo']
+            if (Path(info['checkpoint']).name != checkpoint or info['person_class'] != 0 or
+                    info['class_count'] != 80 or 'coco' not in info['training_data_metadata'].lower()):
+                raise RuntimeError(f'Detector metadata mismatch: {case} {checkpoint}')
+        if (new_summary['yolo']['model_task'] != 'detect' or
+                new_summary['yolo']['device'] != 'cuda:0' or
+                new_summary['yolo']['confidence'] != .25 or
+                new_summary['yolo']['imgsz'] != 640):
+            raise RuntimeError(f'YOLO26n inference configuration mismatch: {case}')
+        for key in ('seed', 'camera', 'robot_speed_m_s', 'collision_threshold_m',
+                    'warning_threshold_m', 'human_specs'):
+            if old_summary[key] != new_summary[key]:
+                raise RuntimeError(f'Frozen configuration differs: {case} {key}')
+        if old_rows[case]['actual_collision'] != new_rows[case]['actual_collision']:
+            raise RuntimeError(f'Actual collision changed: {case}')
+        for label, root, row, summary in (('YOLO11n', old_root, old_rows[case], old_summary),
+                                          ('YOLO26n', new_root, new_rows[case], new_summary)):
+            folder = root/case/'seed_17'
+            frames = json.loads((folder/'perception.json').read_text())
+            truth = json.loads((folder/'evaluation_gt.json').read_text())
+            if len(frames) != 349:
+                raise RuntimeError(f'Exposure count differs: {case} {label}')
+            ids = [set() for _ in summary['human_specs']]
+            for frame in frames:
+                active = [t for t in frame['tracks'] if t['miss_count']==0]
+                if not active:
+                    continue
+                human_xy, _ = gt_at(truth, frame['exposure_time'], len(ids))
+                cost = np.linalg.norm(human_xy[:, None, :]-
+                                      np.asarray([t['state'][:2] for t in active])[None, :, :], axis=2)
+                matched_people, matched_tracks = linear_sum_assignment(cost)
+                for i, j in zip(matched_people, matched_tracks):
+                    if cost[i, j] <= 1.5:
+                        ids[i].add(active[j]['track_id'])
+            confidence = [c for frame in frames for c in frame['confidence']]
+            extras = dict(median_confidence=float(np.median(confidence)) if confidence else None,
+                          duplicate_detection_pairs=sum(overlapping_box_pairs(f['boxes']) for f in frames),
+                          track_fragmentation=sum(max(0, len(x)-1) for x in ids),
+                          inference_count=len(frames),
+                          yolo_mean_ms=float(np.mean([f['yolo_ms'] for f in frames])),
+                          yolo_p95_ms=float(np.percentile([f['yolo_ms'] for f in frames], 95)),
+                          yolo_responses_per_wall_s=len(frames)/summary['wall_seconds'])
+            all_rows.append({key: ({**row, **extras, 'detector': label}.get(key)) for key in columns})
+    with (new_root/'YOLO11N_VS_YOLO26N_COMPARISON.csv').open('w', newline='') as handle:
+        writer = csv.DictWriter(handle, columns)
+        writer.writeheader(); writer.writerows(all_rows)
+
+    def f(value, digits=2):
+        return '—' if value in ('', None) else f'{float(value):.{digits}f}'
+    def m(label, key):
+        return [float(r[key]) for r in all_rows if r['detector']==label and r[key] not in ('', None)]
+    def med(label, key):
+        values = m(label, key)
+        return f(np.median(values)) if values else '—'
+    def total(label, key):
+        return sum(int(r[key]) for r in all_rows if r['detector']==label)
+    def value(case, label, key):
+        return next(r[key] for r in all_rows if r['scenario']==case and r['detector']==label)
+    def positive_sustained_median(label):
+        values = [float(r['sustained_lead_time']) for r in all_rows
+                  if r['detector']==label and r['scenario'] in CASES[:5]
+                  and r['sustained_lead_time'] not in ('', None)]
+        return f(np.median(values)) if values else '—'
+    continuity_wins = sum(float(new_rows[c]['detection_continuity']) >
+                          float(old_rows[c]['detection_continuity']) for c in CASES)
+    id_wins = sum(int(new_rows[c]['id_switches']) < int(old_rows[c]['id_switches']) for c in CASES)
+    positives = CASES[:5]
+    negatives = CASES[5:8]
+    lines = ['# YOLO26n third-person collision prediction A/B', '',
+             '## 1. Detector Change',
+             'Only the official COCO detection checkpoint changed: YOLO11n → YOLO26n. '
+             'Both resolve COCO person class 0. YOLO26n uses the installed Ultralytics 8.4.144 on CUDA.', '',
+             '## 2. Frozen System',
+             'Same fixed camera, 640×360 at 10 Hz, conf 0.25, imgsz 640, depth, Hungarian/CV-KF, '
+             'CPA/TTC, 5 s rollout, thresholds, robot motion, scenarios and seed 17. '
+             'The comparison script checked camera/robot/scenario parameters and 349 exposures for every pair. '
+             'YOLO11n files were read-only. Visibility GT was not labeled, so exposure continuity is not visible-person recall.', '',
+             '## 3. Detection Comparison',
+             '| Scene | Continuity 11n / 26n | First detection 11n / 26n (s) | Mean confidence 11n / 26n |',
+             '|---|---:|---:|---:|']
+    for case in CASES:
+        a, b = old_rows[case], new_rows[case]
+        lines.append(f"| {case} | {f(a['detection_continuity'],3)} / {f(b['detection_continuity'],3)} | "
+                     f"{f(a['first_detection_time'])} / {f(b['first_detection_time'])} | "
+                     f"{f(a['mean_confidence'],3)} / {f(b['mean_confidence'],3)} |")
+    lines += ['', f'Continuity improved in {continuity_wins}/9 scenes. '
+              'Missed-exposure ratios, median confidence and high-IoU (>0.8) duplicate-box-pair proxies are in the CSV; '
+              'a high-IoU pair is not automatically a GT-confirmed duplicate.', '',
+              '## 4. Tracking Comparison',
+              '| Scene | Position MAE 11n / 26n (m) | P95 11n / 26n (m) | Velocity MAE 11n / 26n (m/s) | ID switches 11n / 26n |',
+              '|---|---:|---:|---:|---:|']
+    for case in CASES:
+        a, b = old_rows[case], new_rows[case]
+        lines.append(f"| {case} | {f(a['position_mae'],3)} / {f(b['position_mae'],3)} | "
+                     f"{f(a['position_p95'],3)} / {f(b['position_p95'],3)} | "
+                     f"{f(a['velocity_mae'],3)} / {f(b['velocity_mae'],3)} | "
+                     f"{a['id_switches']} / {b['id_switches']} |")
+    lines += ['', f'ID-switch count fell in {id_wins}/9 scenes; total switches: '
+              f"{total('YOLO11n','id_switches')} → {total('YOLO26n','id_switches')}. "
+              'GT-associated unique-ID fragmentation, track continuity and duplicate-track frames are in the CSV; '
+              'these offline associations never enter online inference. '
+              f"Cut-in fragmentation: {value('cutin_collision','YOLO11n','track_fragmentation')} → "
+              f"{value('cutin_collision','YOLO26n','track_fragmentation')}; "
+              f"rear-end: {value('rear_end_collision','YOLO11n','track_fragmentation')} → "
+              f"{value('rear_end_collision','YOLO26n','track_fragmentation')}.", '',
+              '## 5. Collision Prediction Comparison',
+              '| Scene | Actual | Predicted 11n / 26n | First lead 11n / 26n (s) | Sustained lead 11n / 26n (s) |',
+              '|---|---:|---:|---:|---:|']
+    for case in CASES:
+        a, b = old_rows[case], new_rows[case]
+        lines.append(f"| {case} | {a['actual_collision']} | {a['predicted_collision']} / {b['predicted_collision']} | "
+                     f"{f(a['lead_time'])} / {f(b['lead_time'])} | "
+                     f"{f(a['sustained_lead_time'])} / {f(b['sustained_lead_time'])} |")
+    for label, rows in (('YOLO11n', old_rows), ('YOLO26n', new_rows)):
+        tp = sum(rows[c]['predicted_collision']=='True' for c in positives)
+        fp = sum(rows[c]['predicted_collision']=='True' for c in negatives)
+        lines.append(f'{label}: single-person TP={tp}, FN={5-tp}, FP={fp}, TN={3-fp}; '
+                     f'positive sustained-lead median={positive_sustained_median(label)} s.')
+    near_frames = json.loads((new_root/'perpendicular_nearmiss'/'seed_17'/'perception.json').read_text())
+    near_alarm_frames = sum(any(r['risk']=='COLLISION_RISK' for r in frame['risks']) for frame in near_frames)
+    lines += ['', f'YOLO26n perpendicular near-miss false alarm lasted {near_alarm_frames} exposure frame(s). '
+              'The online run-level decision is still a false positive; the post-hoc sustained-alarm diagnostic does not erase it.']
+    old_ranking = json.loads((old_root/'multi_person_collision'/'seed_17'/'MULTI_PERSON_RISK_RANKING.json').read_text())
+    new_ranking = json.loads((new_root/'multi_person_collision'/'seed_17'/'MULTI_PERSON_RISK_RANKING.json').read_text())
+    lines += ['', '## 6. Multi-person Result',
+              '| Person | Actual proxy | Collision-risk frames 11n / 26n | Associated frames 11n / 26n |',
+              '|---|---:|---:|---:|']
+    for a, b in zip(old_ranking, new_ranking):
+        if a['person'] != b['person'] or a['actual_collision_proxy'] != b['actual_collision_proxy']:
+            raise RuntimeError('Multi-person GT person alignment changed')
+        lines.append(f"| {a['person']} | {a['actual_collision_proxy']} | "
+                     f"{a['collision_risk_frames']} / {b['collision_risk_frames']} | "
+                     f"{a['associated_frames']} / {b['associated_frames']} |")
+    lines += ['', 'Per-person identity here comes from post-run GT association only. '
+              'Online risk uses camera-derived tracks, not GT.', '',
+              '## 7. Runtime',
+              '| Metric (median across nine runs) | YOLO11n | YOLO26n |',
+              '|---|---:|---:|',
+              f'| YOLO response mean (ms) | {med("YOLO11n","yolo_mean_ms")} | {med("YOLO26n","yolo_mean_ms")} |',
+              f'| YOLO response P95 (ms) | {med("YOLO11n","yolo_p95_ms")} | {med("YOLO26n","yolo_p95_ms")} |',
+              f'| YOLO responses / wall-s | {med("YOLO11n","yolo_responses_per_wall_s")} | {med("YOLO26n","yolo_responses_per_wall_s")} |', '',
+              'Responses/wall-s includes Isaac rendering and synchronous pipeline work; it is not detector-only FPS.', '',
+              '## 8. Conclusion',
+              f'1. Detection continuity: improved in {continuity_wins}/9 scenes; '
+              f'median {med("YOLO11n","detection_continuity")} → {med("YOLO26n","detection_continuity")}.',
+              f'2. ID switches / fragmentation: switches fell in {id_wins}/9 scenes and totaled '
+              f'{total("YOLO11n","id_switches")} → {total("YOLO26n","id_switches")}; '
+              f'unique-ID fragmentation totaled {total("YOLO11n","track_fragmentation")} → '
+              f'{total("YOLO26n","track_fragmentation")}.',
+              f'3. Collision prediction: both detectors warned in all five positive single-person runs; '
+              f'YOLO26n introduced {near_alarm_frames} false-alarm frame(s) in one near-miss run '
+              f'while Person 3 collision-risk frames fell from {old_ranking[2]["collision_risk_frames"]} '
+              f'to {new_ranking[2]["collision_risk_frames"]}. This is mixed, not uniformly more stable.',
+              'This single-seed, nine-scene mechanism test does not establish general detector superiority.']
+    (new_root/'YOLO26N_COLLISION_PREDICTION_REPORT.md').write_text('\n'.join(lines), encoding='utf8')
+    print(f'COMPARED {len(CASES)} frozen scenarios')
+
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output-root', type=Path, default=ROOT)
+    parser.add_argument('--detector-label', default='YOLO11n')
+    args = parser.parse_args()
+    ROOT = args.output_root
+    main(args.detector_label)
+    if args.detector_label == 'YOLO26n':
+        compare_detectors()

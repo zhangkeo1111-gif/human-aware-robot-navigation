@@ -14,9 +14,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
-OUTPUT = ROOT / 'outputs' / 'third_person_collision_prediction'
 YOLO_PYTHON = Path(r'D:\detection\robot_human_avoidance\.venv\python.exe')
-YOLO_WEIGHTS = Path(r'D:\detection\robot_human_avoidance\yolo11n.pt')
+YOLO_WEIGHTS_DIR = Path(r'D:\detection\robot_human_avoidance')
 CAMERA = {'path': '/World/CollisionPredictionCamera', 'eye': [5., -5., 7.],
           'target': [5., 0., 0.], 'resolution': [640, 360], 'rate_hz': 10.,
           'focal_mm': 18., 'horizontal_aperture_mm': 24.,
@@ -175,7 +174,8 @@ def run(args):
                          'extra_args': ['--enable', 'isaacsim.sensors.experimental.rtx',
                                         '--enable', 'isaacsim.replicator.agent.core']})
     worker, writer, worker_log = None, None, None
-    out = OUTPUT / args.scenario / f'seed_{args.seed}'
+    out = (ROOT / 'outputs' / f'third_person_collision_prediction_{Path(args.detector_model).stem}'
+           / args.scenario / f'seed_{args.seed}')
     out.mkdir(parents=True, exist_ok=True)
     try:
         import cv2
@@ -249,7 +249,8 @@ def run(args):
         if not writer.isOpened():
             raise RuntimeError('Video writer failed')
         worker_log = (out/'yolo_worker.log').open('w')
-        worker = subprocess.Popen([str(YOLO_PYTHON), str(ROOT/'yolo_worker.py'), str(YOLO_WEIGHTS)],
+        worker = subprocess.Popen([str(YOLO_PYTHON), str(ROOT/'yolo_worker.py'),
+                                   str(YOLO_WEIGHTS_DIR/args.detector_model)],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=worker_log, creationflags=subprocess.CREATE_NO_WINDOW)
         ready = json.loads(worker.stdout.readline())
@@ -337,6 +338,7 @@ def run(args):
         writer.release(); writer = None
         (out/'perception.json').write_text(json.dumps(rows))
         (out/'evaluation_gt.json').write_text(json.dumps(gt_rows))
+        wall_seconds = time.perf_counter()-start_wall
         summary = dict(scenario=args.scenario, seed=args.seed, camera=CAMERA,
                        yolo=ready, robot_speed_m_s=ROBOT_SPEED,
                        collision_threshold_m=radius,
@@ -347,7 +349,8 @@ def run(args):
                        actual_collision=first_collision is not None,
                        lead_time_s=(first_collision-first_risk if first_collision is not None and first_risk is not None else None),
                        min_actual_gt_distance_m=min(min(r['distances_m']) for r in gt_rows),
-                       exposure_count=len(rows), wall_seconds=time.perf_counter()-start_wall,
+                       exposure_count=len(rows), wall_seconds=wall_seconds,
+                       yolo_responses_per_wall_s=len(rows)/wall_seconds,
                        predictor_inputs=['YOLO person boxes', 'third-person depth', 'CV-KF tracks', 'robot ego state'],
                        gt_in_predictor=False, video=str(out/'THIRD_PERSON_COLLISION_PREDICTION.mp4'))
         (out/'summary.json').write_text(json.dumps(summary, indent=2))
@@ -376,4 +379,6 @@ if __name__ == '__main__':
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--seed', type=int, default=17)
     parser.add_argument('--seconds', type=float, default=35.)
+    parser.add_argument('--detector-model', choices=['yolo11n.pt', 'yolo26n.pt'],
+                        default='yolo26n.pt')
     run(parser.parse_args())
