@@ -1,4 +1,4 @@
-# Isaac Sim Human–Robot Perception and Navigation
+# Human-Aware Robot Navigation in Isaac Sim
 
 Research code for human-aware navigation with a simulated Husky A300 in
 NVIDIA Isaac Sim 6.0.1. The robot-camera pipeline uses RGB-D, COCO person
