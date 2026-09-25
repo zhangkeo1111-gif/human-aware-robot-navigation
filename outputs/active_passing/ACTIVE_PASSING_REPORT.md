@@ -100,7 +100,7 @@ Final static run 03 evidence: NAVIGATE 0.0 s; OFFSET 0.30 s; predicted hard-coll
 
 This diagnoses this implemented maneuver, not a proof that every planner is impossible under the camera constraints. Synthetic continuously observed stationary tracks complete all four maneuver phases; real camera support during the tested turn does not. Reducing curvature or explicitly planning for visibility remains unvalidated future work. No camera change or stale-limit relaxation was used to hide this failure.
 
-![Static first-person visual check](STATIC_FIRST_PERSON_REVIEW.png)
+Static first-person visual check: local-only `outputs/active_passing/STATIC_FIRST_PERSON_REVIEW.png` (not included in Git).
 
 ## Performance
 
