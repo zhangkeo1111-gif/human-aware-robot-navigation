@@ -77,11 +77,7 @@ cd D:\detection\robot_human_isaac6
 - 读取到的静止 CameraParams 光心为约 `[0.369524,0.000007,0.635970] m`，光轴近似 `[1,0,0]`；移动时光心随车前进。
 - 支架/小相机壳是额外的 display-only sensor representation，无碰撞或附加质量；不是冒充官方 A300 附件。
 
-已检查真实 RGB 和第三人称输出，人物完整可见，没有大面积车体遮挡，保留官方彩色车体和轮子模型。示例：
-
-![A300 and walking human](D:/detection/robot_human_isaac6/outputs/stage7_a300_stationary/overview.jpg)
-
-![RGB-D person and track](D:/detection/robot_human_isaac6/outputs/stage7_a300_stationary/detection_0020_bbox.png)
+已检查真实 RGB 和第三人称输出，人物完整可见，没有大面积车体遮挡，保留官方彩色车体和轮子模型。示例图片仅保存在本地运行结果中：`outputs/stage7_a300_stationary/overview.jpg` 和 `outputs/stage7_a300_stationary/detection_0020_bbox.png`；未上传 GitHub。
 
 ## Perception
 

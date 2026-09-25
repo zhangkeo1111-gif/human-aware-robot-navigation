@@ -162,12 +162,14 @@ RTF<1 is not wall-clock real time. GPU/RAM scope follows existing resource monit
 
 ## 13. Videos
 Seed 17 was fixed for delivery, not selected after results. Each video is a single continuous run; no cross-run splicing.
-- [circular / social_nav / seed 17 third person](D:/detection/robot_human_isaac6/outputs/social_navigation/benchmark/circular/social_nav/seed_17/run_01/NAVWARESET_CIRCULAR.mp4)
-- [circular / social_nav / seed 17 robot camera](D:/detection/robot_human_isaac6/outputs/social_navigation/benchmark/circular/social_nav/seed_17/run_01/first_person/A300_THREE_PEOPLE_FIRST_PERSON.mp4)
-- [frontal / baseline / seed 17 third person](D:/detection/robot_human_isaac6/outputs/social_navigation/benchmark/frontal/baseline/seed_17/run_01/NAVWARESET_FRONTAL.mp4)
-- [frontal / social_nav / seed 17 third person](D:/detection/robot_human_isaac6/outputs/social_navigation/benchmark/frontal/social_nav/seed_17/run_01/NAVWARESET_FRONTAL.mp4)
-- [perpendicular / baseline / seed 17 third person](D:/detection/robot_human_isaac6/outputs/social_navigation/benchmark/perpendicular/baseline/seed_17/run_01/NAVWARESET_PERPENDICULAR.mp4)
-- [perpendicular / social_nav / seed 17 third person](D:/detection/robot_human_isaac6/outputs/social_navigation/benchmark/perpendicular/social_nav/seed_17/run_01/NAVWARESET_PERPENDICULAR.mp4)
+The following MP4s remain in the local `outputs/social_navigation/benchmark/`
+directory and are not included in this Git repository:
+- `circular/social_nav/seed_17/run_01/NAVWARESET_CIRCULAR.mp4` (third person)
+- `circular/social_nav/seed_17/run_01/first_person/A300_THREE_PEOPLE_FIRST_PERSON.mp4` (robot camera)
+- `frontal/baseline/seed_17/run_01/NAVWARESET_FRONTAL.mp4`
+- `frontal/social_nav/seed_17/run_01/NAVWARESET_FRONTAL.mp4`
+- `perpendicular/baseline/seed_17/run_01/NAVWARESET_PERPENDICULAR.mp4`
+- `perpendicular/social_nav/seed_17/run_01/NAVWARESET_PERPENDICULAR.mp4`
 
 Estimated-state diagnostic: [SOCIAL_COST_TOPDOWN.png](SOCIAL_COST_TOPDOWN.png), with editable vector [SVG](SOCIAL_COST_TOPDOWN.svg). The snapshot uses the first multi-track non-CRUISE/non-STOP decision of the fixed Circular seed 17 run. It shows current uncertainty-inflated contours and 3 s human predictions; it is not a GT trajectory plot or a success-selection metric.
 

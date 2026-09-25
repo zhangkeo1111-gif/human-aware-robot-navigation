@@ -156,7 +156,7 @@ Collision distances are geometric evaluation proxies.
 - 首次 YOLO 曝光时刻 **11.0667 s**；首次 SLOW **11.2333 s**；随后 AVOID **11.8000 s**、STOP **12.4667 s**，恢复 CRUISE **18.1667 s**。
 - 首次反应晚于首次检测约 0.167 s，没有基于 GT 的提前控制。
 - 首次检测画面中人物刚在左边缘局部出现。**首次 YOLO 检测不等于首次可见像素**；84 个遮挡样本也不能解释为整个检测空窗都由墙导致，期间还存在相机视野边界约束。
-- [墙体遮挡](D:/detection/robot_human_isaac6/outputs/navwareset_style/blind_corner/social/run_03/detection_0003_bbox.png) · [首次检测](D:/detection/robot_human_isaac6/outputs/navwareset_style/blind_corner/social/run_03/detection_0113_bbox.png) · [避让反应](D:/detection/robot_human_isaac6/outputs/navwareset_style/blind_corner/social/run_03/detection_0119_bbox.png)
+- 本地关键帧位于 `outputs/navwareset_style/blind_corner/social/run_03/`：`detection_0003_bbox.png`（墙体遮挡）、`detection_0113_bbox.png`（首次检测）、`detection_0119_bbox.png`（避让反应）。这些图片未上传 GitHub。
 
 ### Detection / tracking caveat
 
@@ -177,7 +177,7 @@ Frontal social 有 SLOW/AVOID，而 non-social 全程普通 route following，�
 
 **可支持的结论仅是行为对照确实不同。不能支持 social 在所有场景更安全：本次 Obstruction 的 social 最小距离反而更小。** 不挑选或调参数抹去这一结果；不是论文级统计显著性或算法优越性证明。
 
-对照视频：[Frontal non-social](D:/detection/robot_human_isaac6/outputs/navwareset_style/frontal/non-social/run_01/NAVWARESET_FRONTAL.mp4) · [Obstruction non-social](D:/detection/robot_human_isaac6/outputs/navwareset_style/obstruction/non-social/run_01/NAVWARESET_OBSTRUCTION.mp4)
+对照视频仅在本地：`outputs/navwareset_style/frontal/non-social/run_01/NAVWARESET_FRONTAL.mp4`、`outputs/navwareset_style/obstruction/non-social/run_01/NAVWARESET_OBSTRUCTION.mp4`。
 
 ## Performance
 
@@ -195,13 +195,15 @@ Frontal social 有 SLOW/AVOID，而 non-social 全程普通 route following，�
 
 ## Final Videos and Artifact Validation
 
+下表视频保存在本地 `outputs/navwareset_style/`，未上传 GitHub。
+
 | Scenario | Video | Duration | Frames |
 |---|---|---:|---:|
-| Frontal | [NAVWARESET_FRONTAL.mp4](D:/detection/robot_human_isaac6/outputs/navwareset_style/frontal/social/run_03/NAVWARESET_FRONTAL.mp4) | 31.3 s | 313 |
-| Obstruction | [NAVWARESET_OBSTRUCTION.mp4](D:/detection/robot_human_isaac6/outputs/navwareset_style/obstruction/social/run_03/NAVWARESET_OBSTRUCTION.mp4) | 38.3 s | 383 |
-| Blind corner | [NAVWARESET_BLIND_CORNER.mp4](D:/detection/robot_human_isaac6/outputs/navwareset_style/blind_corner/social/run_03/NAVWARESET_BLIND_CORNER.mp4) | 36.3 s | 363 |
-| Perpendicular | [NAVWARESET_PERPENDICULAR.mp4](D:/detection/robot_human_isaac6/outputs/navwareset_style/perpendicular/social/run_02/NAVWARESET_PERPENDICULAR.mp4) | 36.1 s | 361 |
-| Circular | [NAVWARESET_CIRCULAR.mp4](D:/detection/robot_human_isaac6/outputs/navwareset_style/circular/social/run_02/NAVWARESET_CIRCULAR.mp4) | 36.0 s | 360 |
+| Frontal | `frontal/social/run_03/NAVWARESET_FRONTAL.mp4` | 31.3 s | 313 |
+| Obstruction | `obstruction/social/run_03/NAVWARESET_OBSTRUCTION.mp4` | 38.3 s | 383 |
+| Blind corner | `blind_corner/social/run_03/NAVWARESET_BLIND_CORNER.mp4` | 36.3 s | 363 |
+| Perpendicular | `perpendicular/social/run_02/NAVWARESET_PERPENDICULAR.mp4` | 36.1 s | 361 |
+| Circular | `circular/social/run_02/NAVWARESET_CIRCULAR.mp4` | 36.0 s | 360 |
 
 ffprobe 检查五个视频均为 H.264、960×540、10 fps。轨迹时间戳严格递增；曝光时刻均不晚于响应时刻；关键 Depth arrays 为 360×640。五组分别保存 52 / 62 / 58 / 57 / 57 组关键 Depth。每组 `evidence_index.json` 的 detection、interaction、STOP/AVOID、recovery 图像均存在。最终三个 Python 修改文件通过 py_compile。
 
