@@ -18,6 +18,8 @@ frozen experiment evidence stays beside its corresponding `outputs/` records.
 - [NavWareSet-style scene and interactions](results/NAVWARESET_STYLE_REPORT.md)
 - [Frozen social-navigation benchmark](../outputs/social_navigation/SOCIAL_NAVIGATION_REPORT.md)
 - [Simple active passing across seven classic scenarios](results/ACTIVE_PASSING_SEVEN_SCENES.md)
+- [Third-person collision prediction](../outputs/third_person_collision_prediction/THIRD_PERSON_COLLISION_PREDICTION_REPORT.md)
+- [YOLO11n vs YOLO26n detector comparison](../outputs/third_person_collision_prediction_yolo26n/YOLO26N_COLLISION_PREDICTION_REPORT.md)
 
 The `feature/active-passing` and `feature/third-person-collision-prediction`
 branches contain their own experimental code and result records. Raw runs,

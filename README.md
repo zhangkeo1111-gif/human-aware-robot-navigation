@@ -37,7 +37,7 @@ simulation evidence, **not** a real-robot safety certification.
 - Stable release protocol and environment: [reproducibility guide](docs/setup/REPRODUCIBILITY.md)
 - Stable social-navigation results: [SOCIAL_NAVIGATION_REPORT.md](outputs/social_navigation/SOCIAL_NAVIGATION_REPORT.md)
 - Active-passing code, tests, and [seven-scenario result](docs/results/ACTIVE_PASSING_SEVEN_SCENES.md): `feature/active-passing`
-- Third-person collision-prediction code and compact result reports: `feature/third-person-collision-prediction`
+- Third-person collision-prediction code and [compact result reports](docs/README.md): `feature/third-person-collision-prediction`
 - Official Clearpath A300 descriptions and Isaac Sim character assets are external dependencies; see the [reproducibility guide](docs/setup/REPRODUCIBILITY.md).
 
 Raw runs, model weights, downloaded assets, caches, and MP4 videos remain
