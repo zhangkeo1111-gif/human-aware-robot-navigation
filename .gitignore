@@ -17,6 +17,7 @@ logs/
 Thumbs.db
 .vscode/
 .idea/
+/docs/drafts/
 
 # External model artifacts; dependencies are documented in REPRODUCIBILITY.md
 *.pt
