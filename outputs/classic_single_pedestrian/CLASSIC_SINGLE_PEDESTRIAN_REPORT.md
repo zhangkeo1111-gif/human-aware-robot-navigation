@@ -130,20 +130,23 @@ Nominal ellipses remain front/rear/side 1.2/0.7/0.8 m. Integrated social cost an
 ## 13. Videos
 
 Fixed repeat 17 is used for every showcased video; no best-run selection or stitched runs. Third-person for both controllers in all five scenes; robot-camera first-person for Head-on and Blind Corner. First-person boxes use matching exposure IDs, never GT. Encoded 10 fps is not wall-clock throughput. The unchanged first-person exporter encodes returned camera exposures at 10 fps; missed capture ticks can compress playback. VIDEO_VALIDATION.json reports video duration versus recorded simulation span. Event timings and evaluation use simulation logs, not the video player clock.
-- [headon / baseline / CLASSIC_HEADON.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/headon/baseline/seed_17/run_01/CLASSIC_HEADON.mp4)
-- [headon / baseline / CLASSIC_HEADON_FIRST_PERSON.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/headon/baseline/seed_17/run_01/first_person/CLASSIC_HEADON_FIRST_PERSON.mp4)
-- [headon / social_nav / CLASSIC_HEADON.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/headon/social_nav/seed_17/run_01/CLASSIC_HEADON.mp4)
-- [headon / social_nav / CLASSIC_HEADON_FIRST_PERSON.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/headon/social_nav/seed_17/run_01/first_person/CLASSIC_HEADON_FIRST_PERSON.mp4)
-- [crossing / baseline / CLASSIC_CROSSING.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/crossing/baseline/seed_17/run_01/CLASSIC_CROSSING.mp4)
-- [crossing / social_nav / CLASSIC_CROSSING.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/crossing/social_nav/seed_17/run_01/CLASSIC_CROSSING.mp4)
-- [static_obstruction / baseline / CLASSIC_STATIC_OBSTRUCTION.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/static_obstruction/baseline/seed_17/run_01/CLASSIC_STATIC_OBSTRUCTION.mp4)
-- [static_obstruction / social_nav / CLASSIC_STATIC_OBSTRUCTION.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/static_obstruction/social_nav/seed_17/run_01/CLASSIC_STATIC_OBSTRUCTION.mp4)
-- [overtaking / baseline / CLASSIC_OVERTAKING.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/overtaking/baseline/seed_17/run_01/CLASSIC_OVERTAKING.mp4)
-- [overtaking / social_nav / CLASSIC_OVERTAKING.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/overtaking/social_nav/seed_17/run_01/CLASSIC_OVERTAKING.mp4)
-- [blind_corner / baseline / CLASSIC_BLIND_CORNER.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/blind_corner/baseline/seed_17/run_01/CLASSIC_BLIND_CORNER.mp4)
-- [blind_corner / baseline / CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/blind_corner/baseline/seed_17/run_01/first_person/CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4)
-- [blind_corner / social_nav / CLASSIC_BLIND_CORNER.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/blind_corner/social_nav/seed_17/run_01/CLASSIC_BLIND_CORNER.mp4)
-- [blind_corner / social_nav / CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4](D:/detection/robot_human_isaac6/outputs/classic_single_pedestrian/benchmark/blind_corner/social_nav/seed_17/run_01/first_person/CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4)
+
+All videos below are local-only under `outputs/classic_single_pedestrian/benchmark/`; they are not part of this Git repository:
+
+- `headon/baseline/seed_17/run_01/CLASSIC_HEADON.mp4`
+- `headon/baseline/seed_17/run_01/first_person/CLASSIC_HEADON_FIRST_PERSON.mp4`
+- `headon/social_nav/seed_17/run_01/CLASSIC_HEADON.mp4`
+- `headon/social_nav/seed_17/run_01/first_person/CLASSIC_HEADON_FIRST_PERSON.mp4`
+- `crossing/baseline/seed_17/run_01/CLASSIC_CROSSING.mp4`
+- `crossing/social_nav/seed_17/run_01/CLASSIC_CROSSING.mp4`
+- `static_obstruction/baseline/seed_17/run_01/CLASSIC_STATIC_OBSTRUCTION.mp4`
+- `static_obstruction/social_nav/seed_17/run_01/CLASSIC_STATIC_OBSTRUCTION.mp4`
+- `overtaking/baseline/seed_17/run_01/CLASSIC_OVERTAKING.mp4`
+- `overtaking/social_nav/seed_17/run_01/CLASSIC_OVERTAKING.mp4`
+- `blind_corner/baseline/seed_17/run_01/CLASSIC_BLIND_CORNER.mp4`
+- `blind_corner/baseline/seed_17/run_01/first_person/CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4`
+- `blind_corner/social_nav/seed_17/run_01/CLASSIC_BLIND_CORNER.mp4`
+- `blind_corner/social_nav/seed_17/run_01/first_person/CLASSIC_BLIND_CORNER_FIRST_PERSON.mp4`
 
 ## 14. Performance
 

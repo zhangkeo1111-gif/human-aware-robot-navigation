@@ -126,13 +126,12 @@ Kinematic A300; simple CV prediction; one pedestrian; preset routes; no human in
 
 ## Videos
 
-- [seed_17/CLASSIC_STATIC_OBSTRUCTION.mp4](D:/detection/robot_human_isaac6/outputs/active_passing/development/static_obstruction/active_passing/seed_17/run_01/CLASSIC_STATIC_OBSTRUCTION.mp4)
+These MP4s are local-only under `outputs/active_passing/` and are not included in Git:
 
-- [seed_17/CLASSIC_STATIC_OBSTRUCTION.mp4](D:/detection/robot_human_isaac6/outputs/active_passing/development/static_obstruction/active_passing/seed_17/run_02/CLASSIC_STATIC_OBSTRUCTION.mp4)
-
-- [seed_17/CLASSIC_STATIC_OBSTRUCTION.mp4](D:/detection/robot_human_isaac6/outputs/active_passing/development/static_obstruction/active_passing/seed_17/run_03/CLASSIC_STATIC_OBSTRUCTION.mp4)
-
-- [run_03/CLASSIC_STATIC_OBSTRUCTION_FIRST_PERSON.mp4](D:/detection/robot_human_isaac6/outputs/active_passing/development/static_obstruction/active_passing/seed_17/run_03/first_person/CLASSIC_STATIC_OBSTRUCTION_FIRST_PERSON.mp4)
+- `development/static_obstruction/active_passing/seed_17/run_01/CLASSIC_STATIC_OBSTRUCTION.mp4`
+- `development/static_obstruction/active_passing/seed_17/run_02/CLASSIC_STATIC_OBSTRUCTION.mp4`
+- `development/static_obstruction/active_passing/seed_17/run_03/CLASSIC_STATIC_OBSTRUCTION.mp4`
+- `development/static_obstruction/active_passing/seed_17/run_03/first_person/CLASSIC_STATIC_OBSTRUCTION_FIRST_PERSON.mp4`
 
 ## Final Verdict
 

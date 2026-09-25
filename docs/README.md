@@ -21,6 +21,12 @@ frozen experiment evidence stays beside its corresponding `outputs/` records.
 - [Third-person collision prediction](../outputs/third_person_collision_prediction/THIRD_PERSON_COLLISION_PREDICTION_REPORT.md)
 - [YOLO11n vs YOLO26n detector comparison](../outputs/third_person_collision_prediction_yolo26n/YOLO26N_COLLISION_PREDICTION_REPORT.md)
 
+## Historical experiment audits
+
+- [Classic single-pedestrian benchmark](../outputs/classic_single_pedestrian/CLASSIC_SINGLE_PEDESTRIAN_REPORT.md)
+- [Earlier Active Passing gate](../outputs/active_passing/ACTIVE_PASSING_REPORT.md)
+- [Active Passing v2 failed gate and root-cause analysis](../outputs/active_passing_v2/ACTIVE_PASSING_V2_REPORT.md)
+
 The `feature/active-passing` and `feature/third-person-collision-prediction`
 branches contain their own experimental code and result records. Raw runs,
 model weights, simulator assets, and videos are local-only; links to those

@@ -104,9 +104,9 @@ No parameter was relaxed after the failed gate to manufacture a pass, and no Hea
 
 ## 9. Evidence
 
-- Main report: [ACTIVE_PASSING_V2_REPORT.md](D:/detection/robot_human_isaac6/outputs/active_passing_v2/ACTIVE_PASSING_V2_REPORT.md)
-- Numeric results: [ACTIVE_PASSING_V2_DEVELOPMENT_RESULTS.csv](D:/detection/robot_human_isaac6/outputs/active_passing_v2/ACTIVE_PASSING_V2_DEVELOPMENT_RESULTS.csv)
-- Final gate: [FINAL_STATUS.json](D:/detection/robot_human_isaac6/outputs/active_passing_v2/FINAL_STATUS.json)
-- Latest first-person video: [CLASSIC_STATIC_OBSTRUCTION_FIRST_PERSON.mp4](D:/detection/robot_human_isaac6/outputs/active_passing_v2/development/static_obstruction/active_passing_v2_default/seed_17/run_08/first_person/CLASSIC_STATIC_OBSTRUCTION_FIRST_PERSON.mp4)
+- Main report: [ACTIVE_PASSING_V2_REPORT.md](ACTIVE_PASSING_V2_REPORT.md)
+- Numeric results: [ACTIVE_PASSING_V2_DEVELOPMENT_RESULTS.csv](ACTIVE_PASSING_V2_DEVELOPMENT_RESULTS.csv)
+- Final gate: [FINAL_STATUS.json](FINAL_STATUS.json)
+- Latest first-person video (local-only): `development/static_obstruction/active_passing_v2_default/seed_17/run_08/first_person/CLASSIC_STATIC_OBSTRUCTION_FIRST_PERSON.mp4`
 - Latest planner candidates: `run_08/passing_candidates.json`
 - Latest causal planner trace: `run_08/social_planning.json`
