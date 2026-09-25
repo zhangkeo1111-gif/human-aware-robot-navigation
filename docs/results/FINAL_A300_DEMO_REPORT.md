@@ -10,11 +10,11 @@
 
 ## 最终交付与启动
 
-- 场景：[indoor_demo_scene.usd](indoor_demo_scene.usd)
-- 最终视频：[A300_HUMAN_AVOIDANCE_DEMO.mp4](outputs/stage7_final_demo_run2/A300_HUMAN_AVOIDANCE_DEMO.mp4)：第二次完整运行，H.264，960×540、10 fps，约 31.2 秒，实际仿真画面；未拼接挑选成功片段。
-- 第一轮数据：[run 1](outputs/stage7_final_demo_run1/summary.json)
-- 第二轮数据：[run 2](outputs/stage7_final_demo_run2/summary.json)
-- 相机关键画面：[减速](outputs/stage7_final_demo_run2/detection_0024_bbox.png)、[停车](outputs/stage7_final_demo_run2/detection_0035_bbox.png)、[近距离观测](outputs/stage7_final_demo_run2/detection_0060_bbox.png)。保留原始 RGB 和标注版，包含 bbox、track ID、估计距离、控制状态。
+- 场景：[indoor_demo_scene.usd](../../indoor_demo_scene.usd)
+- 最终视频：本地 `outputs/stage7_final_demo_run2/A300_HUMAN_AVOIDANCE_DEMO.mp4`。第二次完整运行，H.264，960×540、10 fps，约 31.2 秒，实际仿真画面；未拼接挑选成功片段。
+- 第一轮数据：本地 `outputs/stage7_final_demo_run1/summary.json`
+- 第二轮数据：本地 `outputs/stage7_final_demo_run2/summary.json`
+- 相机关键画面：本地 `outputs/stage7_final_demo_run2/detection_0024_bbox.png`、`detection_0035_bbox.png`、`detection_0060_bbox.png`。保留原始 RGB 和标注版，包含 bbox、track ID、估计距离、控制状态。上述运行媒体未上传 GitHub。
 
 在 `D:/detection/robot_human_isaac6` 执行：
 
