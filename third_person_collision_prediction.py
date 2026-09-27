@@ -40,6 +40,10 @@ def scenario_spec(name):
         'perpendicular_nearmiss': ([4.5, -2.5], [[4.5, 2.5]], .65, 6.0),
         'diagonal_nearmiss': ([3.5, -2.3], [[6.5, 2.3]], .60, 4.0),
         'cutin_nearmiss': ([2.5, -2.0], [[5.5, .2], [10.5, .2]], .50, 4.0),
+        # Frozen before robustness runs from GT-only timing geometry; no predictor tuning.
+        'perpendicular_nearmiss_hard': ([4.5, -2.5], [[4.5, 2.5]], .65, 6.8),
+        'diagonal_nearmiss_hard': ([3.5, -2.3], [[6.5, 2.3]], .60, 7.7),
+        'cutin_nearmiss_hard': ([2.5, -2.0], [[5.5, .2], [10.5, .2]], .50, 6.0),
         'multi_person_collision': None,
     }
     if name not in specs:
@@ -196,6 +200,14 @@ def draw_frame(rgb, response, observations, tracks, risks, elapsed, writer, conf
 def run(args):
     if args.optimized and args.detector_model != 'yolo26n.pt':
         raise ValueError('The optimized experiment is restricted to the YOLO26n baseline')
+    if not 0. <= args.detection_dropout_rate <= .3:
+        raise ValueError('Dropout rate must be in [0, 0.3]')
+    if args.detection_dropout_mode == 'none' and args.detection_dropout_rate:
+        raise ValueError('Nonzero dropout rate requires random mode')
+    if args.detection_dropout_mode == 'random' and (not args.optimized or args.robustness_phase != 'dropout'):
+        raise ValueError('Random dropout is only allowed in the optimized dropout experiment')
+    if args.robustness_phase and not args.optimized:
+        raise ValueError('Robustness runs require the frozen optimized baseline')
     from isaacsim import SimulationApp
     app = SimulationApp({'headless': args.headless, 'renderer': 'RayTracedLighting',
                          'width': 960, 'height': 540, 'multi_gpu': False,
@@ -205,8 +217,11 @@ def run(args):
     worker, writer, worker_log = None, None, None
     run_root = ('third_person_collision_prediction_yolo26n_optimized' if args.optimized else
                 f'third_person_collision_prediction_{Path(args.detector_model).stem}')
-    out = (ROOT / 'outputs' / run_root
-           / args.scenario / f'seed_{args.seed}')
+    out = (ROOT / 'outputs' / 'third_person_collision_prediction_robustness'
+           / args.robustness_phase / args.scenario / f'seed_{args.seed}'
+           if args.robustness_phase else ROOT / 'outputs' / run_root / args.scenario / f'seed_{args.seed}')
+    if args.robustness_phase == 'dropout':
+        out = out / f'rate_{round(args.detection_dropout_rate*100):02d}_dropseed_{args.dropout_seed}'
     out.mkdir(parents=True, exist_ok=True)
     try:
         import cv2
@@ -224,6 +239,7 @@ def run(args):
         from tracker import Tracker
 
         np.random.seed(args.seed)
+        dropout_rng = np.random.default_rng(args.dropout_seed)
         config = json.loads((ROOT/'config.yaml').read_text())
         specs = scenario_spec(args.scenario)
         robot_config = settings('a300')
@@ -341,6 +357,11 @@ def run(args):
             yolo_response_ms = 1000*(time.perf_counter()-processing_start)
             if response['frame_id'] != frame_id or response['sim_time'] != stamp:
                 raise RuntimeError('YOLO exposure mismatch')
+            raw_detector_boxes = response['boxes']
+            dropout_applied = bool(args.detection_dropout_mode == 'random' and
+                                   dropout_rng.random() < args.detection_dropout_rate)
+            if dropout_applied:
+                response = {**response, 'boxes': [], 'conf': []}
             if response['boxes'] and first_detection is None:
                 first_detection = elapsed
             measurements, observations = project_people(response, depth, params, config['depth'])
@@ -381,6 +402,9 @@ def run(args):
                        robot_ego_xy=robot_xy.tolist(), robot_ego_velocity=ego_velocity.tolist(),
                        predictor_time=elapsed, exposure_to_predictor_s=age,
                        yolo_ms=response['ms'])
+            if args.robustness_phase == 'dropout':
+                row.update(raw_detector_boxes=raw_detector_boxes,
+                           post_dropout_boxes=response['boxes'], dropout_applied=dropout_applied)
             if args.optimized:
                 row.update(raw_tracks=raw_tracks, consolidated_tracks=tracks,
                            suppressed_duplicate_measurements=discarded,
@@ -422,6 +446,11 @@ def run(args):
                        yolo_responses_per_wall_s=len(rows)/wall_seconds,
                        predictor_inputs=['YOLO person boxes', 'third-person depth', 'CV-KF tracks', 'robot ego state'],
                        gt_in_predictor=False, video=str(out/'THIRD_PERSON_COLLISION_PREDICTION.mp4'))
+        if args.robustness_phase:
+            summary.update(robustness_phase=args.robustness_phase,
+                           detection_dropout_mode=args.detection_dropout_mode,
+                           detection_dropout_rate=args.detection_dropout_rate,
+                           dropout_seed=args.dropout_seed)
         (out/'summary.json').write_text(json.dumps(summary, indent=2))
         print('RESULT', json.dumps({k: summary[k] for k in ('scenario', 'exposure_count',
               'actual_collision', 'predicted_collision', 'lead_time_s', 'min_actual_gt_distance_m')}), flush=True)
@@ -444,7 +473,12 @@ if __name__ == '__main__':
     parser.add_argument('--scenario', required=True, choices=[
         'headon_collision', 'perpendicular_collision', 'diagonal_collision',
         'cutin_collision', 'rear_end_collision', 'perpendicular_nearmiss',
-        'diagonal_nearmiss', 'cutin_nearmiss', 'multi_person_collision'])
+        'diagonal_nearmiss', 'cutin_nearmiss', 'multi_person_collision',
+        'perpendicular_nearmiss_hard', 'diagonal_nearmiss_hard', 'cutin_nearmiss_hard'])
+    parser.add_argument('--robustness-phase', choices=['multiseed', 'hard_nearmiss', 'dropout'])
+    parser.add_argument('--detection-dropout-mode', choices=['none', 'random'], default='none')
+    parser.add_argument('--detection-dropout-rate', type=float, default=0.)
+    parser.add_argument('--dropout-seed', type=int, default=101)
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--seed', type=int, default=17)
     parser.add_argument('--seconds', type=float, default=35.)

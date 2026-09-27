@@ -1,0 +1,10 @@
+scenario,sim_seed,person,actual_collision,raw_risk_frames,confirmed_risk_frames,first_confirmed_risk,associated_frames,unique_track_ids,track_ids
+multi_person_collision,17,Person 1,True,66,63,1.916666766628623,316,4,"[2, 4, 6, 7]"
+multi_person_collision,17,Person 2,False,0,0,,349,1,[1]
+multi_person_collision,17,Person 3,False,0,0,,288,1,[3]
+multi_person_collision,23,Person 1,True,67,64,1.916666766628623,309,5,"[2, 5, 7, 8, 9]"
+multi_person_collision,23,Person 2,False,0,0,,349,1,[1]
+multi_person_collision,23,Person 3,False,0,0,,290,2,"[3, 4]"
+multi_person_collision,31,Person 1,True,67,64,1.8166667614132166,310,5,"[2, 4, 6, 7, 8]"
+multi_person_collision,31,Person 2,False,0,0,,349,1,[1]
+multi_person_collision,31,Person 3,False,0,0,,288,1,[3]
