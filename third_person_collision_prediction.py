@@ -133,7 +133,33 @@ def project_people(response, depth, params, depth_config):
     return measurements, observations
 
 
-def draw_frame(rgb, response, observations, tracks, risks, elapsed, writer):
+def deduplicate_measurements(measurements, observations):
+    """Suppress only same-exposure, same-depth overlapping person measurements."""
+    accepted = [(o, m) for o, m in zip(
+        (o for o in observations if 'estimated_world_xyz' in o), measurements)]
+    kept = []
+    for observation, measurement in accepted:
+        a = observation['bbox']
+        match = None
+        for i, (other, old_measurement) in enumerate(kept):
+            b = other['bbox']
+            overlap = max(0., min(a[2], b[2])-max(a[0], b[0])) * max(0., min(a[3], b[3])-max(a[1], b[1]))
+            area_a = (a[2]-a[0])*(a[3]-a[1])
+            area_b = (b[2]-b[0])*(b[3]-b[1])
+            iou = overlap / max(area_a+area_b-overlap, 1e-9)
+            if (iou >= .50 and np.linalg.norm(measurement[0]-old_measurement[0]) <= .15 and
+                    abs(observation['depth_diagnostic']['depth_m']-
+                        other['depth_diagnostic']['depth_m']) <= .35):
+                match = i
+                break
+        if match is None:
+            kept.append((observation, measurement))
+        elif observation['confidence'] > kept[match][0]['confidence']:
+            kept[match] = (observation, measurement)
+    return [measurement for _, measurement in kept], len(accepted)-len(kept)
+
+
+def draw_frame(rgb, response, observations, tracks, risks, elapsed, writer, confirmed_risk=None):
     import cv2
     image = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     cv2.rectangle(image, (0, 0), (640, 49), (16, 24, 35), -1)
@@ -141,7 +167,8 @@ def draw_frame(rgb, response, observations, tracks, risks, elapsed, writer):
         'WARNING' if any(r['risk']=='WARNING' for r in risks) else 'SAFE')
     cv2.putText(image, f'Fixed third-person RGB-D | t={elapsed:.1f}s', (9, 19),
                 cv2.FONT_HERSHEY_SIMPLEX, .47, (255, 255, 255), 1, cv2.LINE_AA)
-    cv2.putText(image, overall, (9, 40), cv2.FONT_HERSHEY_SIMPLEX, .61,
+    label = overall if confirmed_risk is None else f'RAW {overall} | CONFIRMED {confirmed_risk}'
+    cv2.putText(image, label, (9, 40), cv2.FONT_HERSHEY_SIMPLEX, .50 if confirmed_risk else .61,
                 (30, 80, 255) if overall != 'SAFE' else (120, 240, 120), 2, cv2.LINE_AA)
     for box, observation in zip(response['boxes'], observations):
         x1, y1, x2, y2 = map(int, box)
@@ -167,6 +194,8 @@ def draw_frame(rgb, response, observations, tracks, risks, elapsed, writer):
 
 
 def run(args):
+    if args.optimized and args.detector_model != 'yolo26n.pt':
+        raise ValueError('The optimized experiment is restricted to the YOLO26n baseline')
     from isaacsim import SimulationApp
     app = SimulationApp({'headless': args.headless, 'renderer': 'RayTracedLighting',
                          'width': 960, 'height': 540, 'multi_gpu': False,
@@ -174,7 +203,9 @@ def run(args):
                          'extra_args': ['--enable', 'isaacsim.sensors.experimental.rtx',
                                         '--enable', 'isaacsim.replicator.agent.core']})
     worker, writer, worker_log = None, None, None
-    out = (ROOT / 'outputs' / f'third_person_collision_prediction_{Path(args.detector_model).stem}'
+    run_root = ('third_person_collision_prediction_yolo26n_optimized' if args.optimized else
+                f'third_person_collision_prediction_{Path(args.detector_model).stem}')
+    out = (ROOT / 'outputs' / run_root
            / args.scenario / f'seed_{args.seed}')
     out.mkdir(parents=True, exist_ok=True)
     try:
@@ -257,9 +288,12 @@ def run(args):
         if not ready.get('ready') or ready.get('person_class') != 0:
             raise RuntimeError(f'YOLO person initialization failed: {ready}')
         tracker = Tracker(config['tracking'])
+        raw_tracker = Tracker(config['tracking']) if args.optimized else None
         initial_time = world.current_time
         last_exposure = -math.inf
-        first_detection = first_risk = first_collision = None
+        first_detection = first_risk = first_confirmed_risk = first_collision = None
+        previous_raw_collision = False
+        suppressed_measurements = 0
         frame_id = 0
         rows, gt_rows = [], []
         print('THIRD_PERSON_RUN', args.scenario, str(out), flush=True)
@@ -300,19 +334,30 @@ def run(args):
                                                          for k, v in params.items()}}, indent=2))
             meta = json.dumps(dict(frame_id=frame_id, sim_time=stamp)).encode()
             payload = struct.pack('<I', len(meta))+meta+rgb.tobytes()
+            processing_start = time.perf_counter()
             worker.stdin.write(struct.pack('<I', len(payload))+payload)
             worker.stdin.flush()
             response = json.loads(worker.stdout.readline())
+            yolo_response_ms = 1000*(time.perf_counter()-processing_start)
             if response['frame_id'] != frame_id or response['sim_time'] != stamp:
                 raise RuntimeError('YOLO exposure mismatch')
             if response['boxes'] and first_detection is None:
                 first_detection = elapsed
             measurements, observations = project_people(response, depth, params, config['depth'])
+            tracking_start = time.perf_counter()
+            raw_tracks = raw_tracker.update(stamp, measurements) if raw_tracker else None
+            if args.optimized:
+                measurements, discarded = deduplicate_measurements(measurements, observations)
+                suppressed_measurements += discarded
+            else:
+                discarded = 0
             tracks = tracker.update(stamp, measurements)
+            association_tracking_ms = 1000*(time.perf_counter()-tracking_start)
             ego_velocity = robot.get_linear_velocity()[:2]
             # Exposure-aligned KF state is propagated causally to the current
             # response/ego-state time; the lag is usually one or two physics ticks.
             age = max(0., world.current_time-stamp)
+            risk_start = time.perf_counter()
             risks = []
             for track in tracks:
                 if track['miss_count'] or track['age'] < 3:
@@ -323,14 +368,32 @@ def run(args):
                                   **predictions(current_state, robot_xy, ego_velocity, radius)))
             if any(r['risk']=='COLLISION_RISK' for r in risks) and first_risk is None:
                 first_risk = elapsed
+            raw_collision = any(r['risk']=='COLLISION_RISK' for r in risks)
+            confirmed_risk = ('CONFIRMED_COLLISION_RISK' if raw_collision and previous_raw_collision else
+                              'WARNING' if raw_collision or any(r['risk']=='WARNING' for r in risks) else 'SAFE')
+            previous_raw_collision = raw_collision
+            if confirmed_risk == 'CONFIRMED_COLLISION_RISK' and first_confirmed_risk is None:
+                first_confirmed_risk = elapsed
+            risk_prediction_ms = 1000*(time.perf_counter()-risk_start)
             row = dict(frame_id=frame_id, exposure_time=stamp-initial_time,
                        response_time=elapsed, boxes=response['boxes'], confidence=response['conf'],
                        observations=observations, tracks=tracks, risks=risks,
                        robot_ego_xy=robot_xy.tolist(), robot_ego_velocity=ego_velocity.tolist(),
                        predictor_time=elapsed, exposure_to_predictor_s=age,
                        yolo_ms=response['ms'])
+            if args.optimized:
+                row.update(raw_tracks=raw_tracks, consolidated_tracks=tracks,
+                           suppressed_duplicate_measurements=discarded,
+                           raw_risk='COLLISION_RISK' if raw_collision else
+                                    'WARNING' if any(r['risk']=='WARNING' for r in risks) else 'SAFE',
+                           confirmed_risk=confirmed_risk, yolo_response_ms=yolo_response_ms,
+                           association_tracking_ms=association_tracking_ms,
+                           risk_prediction_ms=risk_prediction_ms)
             rows.append(row)
-            draw_frame(rgb, response, observations, tracks, risks, elapsed, writer)
+            draw_frame(rgb, response, observations, tracks, risks, elapsed, writer,
+                       confirmed_risk if args.optimized else None)
+            if args.optimized:
+                row['overall_processing_ms'] = 1000*(time.perf_counter()-processing_start)
             if frame_id in (1, 30, 80):
                 cv2.imwrite(str(out/f'camera_{frame_id:04d}.png'), cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
             if count % 600 == 0:
@@ -346,6 +409,12 @@ def run(args):
                        human_specs=specs, first_detection_time=first_detection,
                        first_risk_time=first_risk, actual_collision_time=first_collision,
                        predicted_collision=first_risk is not None,
+                       confirmed_predicted_collision=first_confirmed_risk is not None if args.optimized else None,
+                       first_confirmed_risk_time=first_confirmed_risk if args.optimized else None,
+                       confirmed_lead_time_s=(first_collision-first_confirmed_risk
+                                              if args.optimized and first_collision is not None and
+                                              first_confirmed_risk is not None else None),
+                       suppressed_duplicate_measurements=suppressed_measurements if args.optimized else None,
                        actual_collision=first_collision is not None,
                        lead_time_s=(first_collision-first_risk if first_collision is not None and first_risk is not None else None),
                        min_actual_gt_distance_m=min(min(r['distances_m']) for r in gt_rows),
@@ -381,4 +450,6 @@ if __name__ == '__main__':
     parser.add_argument('--seconds', type=float, default=35.)
     parser.add_argument('--detector-model', choices=['yolo11n.pt', 'yolo26n.pt'],
                         default='yolo26n.pt')
+    parser.add_argument('--optimized', action='store_true',
+                        help='Use same-exposure duplicate filtering and 2-frame risk confirmation')
     run(parser.parse_args())

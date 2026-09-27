@@ -88,3 +88,12 @@ Thumbs.db
 !/outputs/active_passing_v2/ACTIVE_PASSING_V2_STATIC_TOPDOWN.png
 !/outputs/active_passing_v2/FINAL_STATUS.json
 !/outputs/active_passing_v2/VIDEO_VALIDATION.json
+
+# Compact third-person optimization evidence; full runs/videos remain local.
+!/outputs/third_person_collision_prediction_yolo26n_optimized/
+/outputs/third_person_collision_prediction_yolo26n_optimized/*
+!/outputs/third_person_collision_prediction_yolo26n_optimized/REAR_END_TRACK_FRAGMENTATION_AUDIT.csv
+!/outputs/third_person_collision_prediction_yolo26n_optimized/REAR_END_TRACK_FRAGMENTATION_AUDIT.md
+!/outputs/third_person_collision_prediction_yolo26n_optimized/PERP_NEARMISS_FALSE_ALARM_AUDIT.md
+!/outputs/third_person_collision_prediction_yolo26n_optimized/YOLO26N_BEFORE_AFTER_OPTIMIZATION.csv
+!/outputs/third_person_collision_prediction_yolo26n_optimized/YOLO26N_TRACKING_AND_FALSE_ALARM_OPTIMIZATION.md
